@@ -19,9 +19,8 @@ discreteInterimFleming <- function(k,
                                     nk, 
                                     Ek) 
 {
-  ##########################################################################################################
   ### Prerequisites
-  ##########################################################################################################
+
   
   if(length(nk)!=k) {stop("Every stage (k) specified should be assigned a corresponding sample size (nk)")}
   if(length(Ek)> k) {stop("Number of endpoint events (E) exceeds number of stages (k)")}
@@ -33,9 +32,9 @@ discreteInterimFleming <- function(k,
   # Validity of nominal type I/ II error 
   if(alpha <= 0 | alpha >= 1 ) {stop("Nominal type I error rate must be between 0 and 1")}
 
-  #########################################################################################################
+
   ### Fleming's (1982) critical boundaries 
-  ##########################################################################################################
+
   
   z.alpha <- qnorm(1-alpha)
   Nk <- sum(nk)
@@ -61,9 +60,9 @@ discreteInterimFleming <- function(k,
     }
   }
   
-  ############################################################################################################
+
   ### Conclusion based on critical boundaries
-  ############################################################################################################
+
   
   Sk <- cumsum(Ek)
   
