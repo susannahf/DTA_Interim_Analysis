@@ -339,39 +339,101 @@ Next steps:
 ```{r createsavedgraphs, eval=FALSE}
 # This code DOES NOT run when the file is knit.  It should be run manually
 # when saved graphs are to be created.
-
 library(ggplot2)
+library(tidyverse)
+library(ggrepel)
 
-# add data to contshorts
+#### graphs of example data
+
+# add x data to contshorts
 contshort1$x = 1:nrow(contshort1)
 contshort2$x = 1:nrow(contshort2)
 
-cs1plot <- ggplot(data=contshort1, aes(x=x)) + 
-  geom_line(aes(y=Se)) +
-  geom_line(aes(y=Sp))
-print(cs1plot)
+# reshape for plotting
+cs1 <- contshort1 %>% gather("Sesp", "Sespvalue", Se, Sp)
+cs1$dataset <- "Dataset 1"
+cs2 <- contshort2 %>% gather("Sesp", "Sespvalue", Se, Sp)
+cs2$dataset <- "Dataset 2"
+csboth <- merge(cs1,cs2, all=T)
+
+# improve labelling
+csboth$Sesp[csboth$Sesp=="Se"] <- "Sensitivity"
+csboth$Sesp[csboth$Sesp=="Sp"] <- "Specificity"
+
+csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) + 
+  geom_line() +
+  theme_bw() +
+  geom_text_repel(data=subset(csboth, x==200), nudge_x = 30) +
+  scale_color_grey() +
+  theme(legend.position="none") +
+  labs(x="Data point", y="Proportion") +
+  facet_grid(. ~ dataset)
+print(csplot)
+
+ggsave("datasets.png",width=12,height=5)
+
+
+### graphs of continuous thresholds
+
+# need to add data from sep0_60 and spp0_90 to example data
+sep0_60$x <- spp0_90$x <- 1:nrow(sep0_60)  
+sep0_60$Sesp <- "Sensitivity"
+sep0_60$p0 <- 0.6
+spp0_90$Sesp <- "Specificity"
+spp0_90$p0 <- 0.9
+
+dat60 <- sep0_60 %>% gather("Measure", "thvalue", invH0limit, invH1limit, p0)
+dat90 <- spp0_90 %>% gather("Measure", "thvalue", invH0limit, invH1limit, p0)
+threshboth <- merge(dat60, dat90, all=T)
+# improve labelling
+threshboth$Measure[threshboth$Measure=="invH0limit"] <- "accept H0"
+threshboth$Measure[threshboth$Measure=="invH1limit"] <- "reject H0"
+
+alldata <- merge(threshboth, csboth, by=c("x", "Sesp")
+
+
+threshplot <- ggplot(data=threshboth, aes(x=x, y=thvalue, colour=Measure, label=Measure)) + 
+  geom_line() +
+  theme_bw() +
+  geom_text_repel(data=subset(threshboth, x==50), nudge_x = -30) +
+  scale_color_grey() +
+  theme(legend.position="none") +
+  labs(x="Data point", y="Proportion") +
+  facet_grid(. ~ source)
+print(threshplot)
 
 
 
 
 
-# graphs of the test data
-x <- 1:nrow(contshort1)
-testpoints <- c(20, 50, 100)
 
 
 
-
-# plot continuous Se and Sp for contshort1
-plot(x,contshort1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se and Sp, data set 1")
-lines(x,contshort1$Sp,col="blue")
-legend("bottomright", c("Sensitivity", "Specificity"), col=c("red","blue"),lty=c(1,1))
-abline(v=testpoints)
+#Se
+plot(x,contshort1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 1, p0=0.6", ylab="Sensitivity")
+lines(x, sep0_60$invH0limit, col="red", 'l', lty="dashed")
+lines(x, sep0_60$invH1limit, col="red", 'l', lty="dotdash")
+lines(x, rep(0.6,200), col="red")
+legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
+#Sp
+plot(x,contshort1$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 1, p0=0.9", ylab="Specificity")
+lines(x, spp0_90$invH0limit, col="blue", 'l', lty="dashed")
+lines(x, spp0_90$invH1limit, col="blue", 'l', lty="dotdash")
+lines(x, rep(0.9,200), col="blue")
+legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
 
 # plot continuous Se and Sp for contshort2
-plot(x,contshort2$Se,'l',col="red",ylim=c(0,1), main="Continuous Se and Sp, data set 2")
-lines(x,contshort2$Sp,col="blue")
-legend("bottomright", c("Sensitivity", "Specificity"), col=c("red","blue"),lty=c(1,1))
-abline(v=testpoints)
+#Se
+plot(x,contshort2$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 2, p0=0.6", ylab="Sensitivity")
+lines(x, sep0_60$invH0limit, col="red", 'l', lty="dashed")
+lines(x, sep0_60$invH1limit, col="red", 'l', lty="dotdash")
+lines(x, rep(0.6,200), col="red")
+legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
+#Sp
+plot(x,contshort2$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 2, p0=0.9", ylab="Specificity")
+lines(x, spp0_90$invH0limit, col="blue", 'l', lty="dashed")
+lines(x, spp0_90$invH1limit, col="blue", 'l', lty="dotdash")
+lines(x, rep(0.9,200), col="blue")
+legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
 
 ```
