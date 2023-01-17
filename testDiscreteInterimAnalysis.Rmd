@@ -323,15 +323,12 @@ for(a in alphas) {
 ```
 `r kable(nalphares)`
 
-It appears that the two limits converge closer to p0 as both alpha and n increase, and that the H0 limit at n/2 is approximately p0.
+It appears that the two limits converge closer to p0 as both alpha and n increase, and that the H0 limit at n/2 is approximately p0.  It's not clear why this is the case.
 
-Why???
 
 Next steps:
 
-* write this up in overleaf
 * try some other methods (Stafford/todd and/or lan/demetz), particularly to see if they perform similarly in continuous configuration
-* upload onto Github (DTA_Interim_Analysis on personal acct)
 
 
 
