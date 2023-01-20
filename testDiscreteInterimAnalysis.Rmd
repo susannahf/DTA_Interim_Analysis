@@ -329,6 +329,11 @@ It appears that the two limits converge closer to p0 as both alpha and n increas
 Next steps:
 
 * try some other methods (Stafford/todd and/or lan/demetz), particularly to see if they perform similarly in continuous configuration
+* a plot in ROC space of how sens and spec change over time?
+i.e. a standard ROC plot of sens against spec, with a series of points or lines showing a two-dimensional 'random walk' of the sensitivity and specificity estimates as they evolve.
+The 'rejection region' would then look like gradually shrinking rectangle (at least assuming sens and spec are being treated independently - otherwise it might be an ellipse) - this might be difficult to plot on a static graph, as it also changes over time.
+The whole graph might end up looking too messy, but worth a try? I think it could help to emphasise one of the discussion points we want to make, that in diagnostic studies the decision would be based on the sens and spec together, rather than just one of them.
+
 
 
 
