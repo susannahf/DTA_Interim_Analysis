@@ -10,6 +10,8 @@
 
 
 # REMEMBER, c vectors start at 0, and R vectors start at 1!
+# so any initial starting points are coded here as var0 rather than var[0]
+# this will need a bit of care, but I think is safer than doing everything as i+1
 
 # output from c program is:
 # i, lower[i], upper[i], 1-pcross_low2, pcross_low, alpha_u(i,nmax), alpha_l(i, nmax)
@@ -18,13 +20,23 @@
 getBoundary <- function(nmax, smax){
   # initialise lower and upper boundaries
   lowerbound <- upperbound <- rep(NA, nmax)
-  # for n=1, there boundaries are at their extremes
-  lowerbound[1] = -1
-  upperbound[1] = 1
+  # for n=0, their boundaries are at their extremes
+  lowerbound0 = -1 # this makes sure i matches
+  upperbound0 = 1
   
-  for(i in 2:(nmax+1)) {
-    # update_probs(smax)
-    # get_bounds_i(i, nmax, smax)
+  # init_probs(smax)
+  # equivalent of Stallard and Todd's init_probs(smax)
+  # initialises probability vector
+  # prob is a vector of size smax+1 with all elements 0 except prob[0]=1
+  prob <- rep(0,smax)
+  prob0 = 1
+  
+  for(i in 1:nmax) {
+    # update_prob(smax)
+    # equivalent of Stallard and Todd's update_prob(smax)
+    # copy prob to prob_last
+    prob_last <- prob
+    ### get_bounds_i(i, nmax, smax)
   }
   
   # get_power_and_n(nmax, smax, p, power, 0, output) <- probably not necessary for me
@@ -33,7 +45,6 @@ getBoundary <- function(nmax, smax){
 # equivalent of Stallard and Todd's get_bounds_i()
 # searches for upper and lower boundaries at inspection i to satisfy spending function requirements
 # needs get_prob, alpha_l, alpha_u
-
 
 # equivalent of Stallard and Todd's get_prob()
 # finds probability of getting to (si,i) with P(success)=p
