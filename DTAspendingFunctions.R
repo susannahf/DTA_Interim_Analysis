@@ -94,20 +94,85 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # needs get_prob, alpha_l, alpha_u
   getBoundsAt_i <- function(i, nmax, smax) {
     
-    # if i=1, then the crossing probabilities must be 0
+    
+      # this is the  c code:
+      # need to know what these stand for...
+    # p=P0;
+    # stop=0;
+    # upset=0; # is upper boundary set for this i
+    # lowset=0;  # is lower boundary set for this i
+     
+      # if i=1, then the crossing probabilities must be 0
     if(i==1) {
       pcross_low=0
       pcross_low2=0 # not yet sure what these two are
     }
     
-    # loop from lower[i-1] to i+1, stopping if stop=1
-      # if si<0, probsi=0
-      # if si>=0
-        ####get_prob(i,si,p0)
-        ## probsi = prob[si]
-    
-    ### more here
-    
+      # loop si from lower[i-1] to i+1, incrementing, stop if stop==1
+      
+    # for (si=lower[i-1]; stop!=1 && si<=i+1; si++)
+    # {
+      # calculate probability of getting to (si,i) with P(success)=p
+      # I think probsi is p_n(s) in the paper, in which case get_prob uses "a simple path counting method"
+    #   /* find prob of getting to si */
+    #     if (si>=0) 
+    #     {
+    #       get_prob(i, si, p);
+    #       probsi=prob[si];
+    #     }
+      # prob is 0 if si is <0
+    #   else
+    #     probsi=0.;
+    #   
+    #   I think this bit below (only checking every group) is not relevant for our case
+    #   /* boundaries for binomial data with GROUP>1 are given by calculations
+    #   as for Bernoulli case except that stopping is only made possible
+    #   every GROUP observations - when the code below is executed.
+    #   For all other i, the lower boundary remains the same and the
+    #   upper boundary is increased by 1 to make stopping impossible
+    #   */
+    #     if (i%GROUP==0) 
+    #     {
+    #       /* check to see if P(Si>si) is <= 1-alpha_u */
+    #         if (si==lower[i-1]) pcross_low2=pcross_low; # if si is on the lower boundary, set pcross_low2 ???
+    #         if (upset==0)  # if upper boundary not set
+    #         {
+    #           pcross_low2+=probsi; # increment pcrosslow2 by probsci 
+      # the test below is eq 9 from paper, iff pcross_low2 is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to u_n -1)
+      # if si is u_n -1 above, then the below makes sense, because u_n is the upper boundary.
+      # if the test is met, then upper bdy is set to si+1 (=u_n) and upset is set
+    #           if ( pcross_low2 >= 1.-alpha_u(i,nmax) )  
+    #           {
+    #             upper[i]=si+1;
+    #             upset=1;
+    #           }
+    #         }
+    #         
+      # this should implement eq 10 from paper.
+    #         /* and to see if P(Si<si) is > alpha_l */
+    #             if (lowset==0) # if lower boundary not set
+    #             {
+    #               pcross_low+=probsi; # increment pscrosslow by probsci <- this creates the next value of p_l
+      # the test below is eq 10 from paper, iff pcross_low is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to l_n)
+      # if si is ln above, then the below makes sense, because l_n is the lower boundary
+      # and we are testing for > rather than <= so we want the boundary to be si-1
+      # if the test is met, then lower bdy is set to si-1 and lowset is set
+      # pcross_low is set to the probability -probsi, which is the p_l for l_n
+    #               if ( pcross_low > alpha_l(i,nmax) )
+    #               {
+    #                 lower[i]=si-1;
+    #                 pcross_low-=probsi;
+    #                 lowset=1;
+    #               }
+    #             }
+    #         if (lowset==1 && upset==1) stop=1; # stop if both set
+    #     }
+    #   else # this deals with situations where this i isn't divisible by group
+    #   {
+    #     upper[i]=upper[i-1]+1;
+    #     lower[i]=lower[i-1];
+    #   }   
+    # }
     
   }
   
