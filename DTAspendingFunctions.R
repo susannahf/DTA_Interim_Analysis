@@ -20,7 +20,7 @@
 # output from c program is: (starting with i=1) is from get_power_and_n
 # i, lower[i], upper[i], 1-pcross_low2, pcross_low, alpha_u(i,nmax), alpha_l(i, nmax)
 
-uberfunction <- function(){
+uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # things that need to be globally accessible happen here
   # this is kind of the equivalent of main() in Stallard and Todd
   
@@ -29,8 +29,28 @@ uberfunction <- function(){
   
   
   
-  # do some stuff that ultimately calls getBoundary()
+  # call getBoundary() in a searching loop to find nmax such that nmax<NMAX+1 
+  # and power is closest to specified power (but a bit less)
+  # this is needed to get the defined power because the lower boundary is defined by (1-alpha) and not beta
+  # need to determine what nmax actually is...
+  # /* search starts looking every GINC and is refined to GINC/10  ... 1 */
+  #   for (g_inc=GINC; g_inc>=1; g_inc/=10)
+  #   {
+  #     if (g_inc==GINC) g_start=GSTART;
+  #     else g_start=(int)(nmax/GROUP)-19*g_inc;
+  #     power1[0]=0.;
+  #     for (nmax=g_start*GROUP; nmax<NMAX_PLUS_1 && power1[0]<POWER;
+  #          nmax+=g_inc*GROUP)
+  #     {
+  #       get_boundary(nmax, smax, power1, output);
+  #       printf("nmax=%i: power at p=%f = %f\n", nmax,P1,power1[0]);
+  #     }
+  #   }
+  # 
+  # nmax-=GROUP;
   
+  #get_power_and_n(nmax, smax, p0, power0, 1, output); #may not need this other than for output
+  # this is the point where the output is given
   
   
   # equivalent of Stallard and Todd's get_boundary function
@@ -57,7 +77,7 @@ uberfunction <- function(){
       getBoundsAt_i(i, nmax, smax)
     }
     
-    # get_power_and_n(nmax, smax, p, power, 0, output) <- probably not necessary for me
+    # get_power_and_n(nmax, smax, p, power, 0, output) <- needed for the power search
   }
   
   # equivalent of Stallard and Todd's get_bounds_i()
