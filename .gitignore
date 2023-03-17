@@ -2,3 +2,5 @@
 *.rds
 *.docx
 .Rhistory
+.Rproj.user
+*.Rproj

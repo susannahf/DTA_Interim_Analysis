@@ -14,7 +14,14 @@
 # FP  TN
 # these are defaulted as follows: n=100, p=0.25, se=0.7, sp=0.9 
 # if verbose=T, will print actual values after rounding.
-create2x2 <- function(n=100,p=0.25,se=0.7,sp=0.9, verbose=F) {
+create2x2 <- function(n=100,p=0.25,se=0.7,sp=0.9, digits=3,verbose=F) {
+  
+  # Preliminary checks 
+  if(p <= 0 | p >= 1 ) {stop("The specified prevalence must be between 0 and 1")}
+  if(se <= 0 | se >= 1 ) {stop("The specified sensitivity must be between 0 and 1")}
+  if(sp <= 0 | sp >= 1 ) {stop("The specified specificity must be between 0 and 1")}
+  
+  
   d = n*(se-p)/(1+se/sp-1/sp)
   a = se*(n-d/sp)
   b = d*(1/sp-1)
@@ -27,9 +34,16 @@ create2x2 <- function(n=100,p=0.25,se=0.7,sp=0.9, verbose=F) {
   #create 2x2 for output
   twobytwo <- matrix(data=c(a,b,c,d),2,2)
   if(verbose){
+    dimnames(twobytwo) <- list(c("row1","row2"),
+                               c("column1","column2"))
     print(twobytwo)
-    print(paste("n=",a+b+c+d,"; prevalence=",signif((a+b)/(a+b+c+d),3)))
-    print(paste("sensitivity=",signif(a/(a+c),3),"; specificity=",signif(d/(d+b),3)))
+    
+    cat("Total sample size: ",a+b+c+d,sep="", "\n")
+    cat("Output rounded to ", digits, " significant figures",sep="", "\n")
+    cat("Prevalence: ",signif((a+b)/(a+b+c+d),digits=digits),sep="", "\n")
+    cat("Sensitivity: ",signif(a/(a+c),digits=digits),sep="", "\n")
+    cat("Specificity: ",signif(d/(d+b),digits=digits),sep="", "\n")
+    
   }
   if(any(twobytwo<0)) stop("some cells require negative numbers to fulfil desired specifications")
   return(twobytwo)
@@ -93,7 +107,15 @@ continuousSeSp <- function(DTAdata, ref="reference", index="index", Se="Se", Sp=
   DTAdata$TN <- TN
   DTAdata[,Se] <- se
   DTAdata[,Sp] <- sp
-  return(DTAdata)
+  
+  library(tidyverse)
+  
+  DTAdata_output <- DTAdata%>%
+                     dplyr::mutate(Se=dplyr::case_when(is.nan(Se)~NA_real_,
+                                                       !is.nan(Se)~Se),
+                                   Sp=dplyr::case_when(is.nan(Sp)~NA_real_,
+                                                       !is.nan(Sp)~Sp))
+  return(DTAdata_output)
 }
 
 
