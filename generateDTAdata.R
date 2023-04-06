@@ -108,14 +108,7 @@ continuousSeSp <- function(DTAdata, ref="reference", index="index", Se="Se", Sp=
   DTAdata[,Se] <- se
   DTAdata[,Sp] <- sp
   
-  library(tidyverse)
-  
-  DTAdata_output <- DTAdata%>%
-                     dplyr::mutate(Se=dplyr::case_when(is.nan(Se)~NA_real_,
-                                                       !is.nan(Se)~Se),
-                                   Sp=dplyr::case_when(is.nan(Sp)~NA_real_,
-                                                       !is.nan(Sp)~Sp))
-  return(DTAdata_output)
+  return(DTAdata)
 }
 
 
