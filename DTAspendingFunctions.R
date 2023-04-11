@@ -25,9 +25,9 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # this is kind of the equivalent of main() in Stallard and Todd
   
   # define globally accessible variables
-  prob <- prob_last <- numeric()
-  
-  
+  prob <- prob_last <- lowerbound <- uppoerbound <- rep(NA, nmax)
+  prob0 <- prob_last0 <- lowerbound0 <- upperbound0 <- NA
+
   
   # call getBoundary() in a searching loop to find nmax such that nmax<NMAX+1 
   # and power is closest to specified power (but a bit less)
@@ -48,9 +48,12 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   #   }
   # 
   # nmax-=GROUP;
+  # 
+  # p=P0
   
   #get_power_and_n(nmax, smax, p0, power0, 1, output); #may not need this other than for output
   # this is the point where the output is given
+  
   
   
   # equivalent of Stallard and Todd's get_boundary function
@@ -61,18 +64,15 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     lowerbound0 = -1 # this makes sure i matches
     upperbound0 = 1
     
-    # init_probs(smax)
-    # equivalent of Stallard and Todd's init_probs(smax)
-    # initialises probability vector
-    # prob is a vector of size smax+1 with all elements 0 except prob[0]=1
-    prob <<- rep(0,smax)
-    prob0 = 1
+    # initialise prob[1:smax] and prob0
+    initProbs(smax)
     
     for(i in 1:nmax) {
       # update_prob(smax)
       # equivalent of Stallard and Todd's update_prob(smax)
       # copy prob to prob_last
       prob_last <<- prob
+      prob_last0 <<- prob0
       # get upper and lower boundaries at inspection i
       getBoundsAt_i(i, nmax, smax)
     }
@@ -174,6 +174,15 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     #   }   
     # }
     
+  }
+  
+  # initialise prob[1:smax] and prob0
+  # equivalent of Stallard and Todd's init_probs(smax)
+  initProbs <- function(smax) {
+    # initialises probability vector up to smax
+    # all element of prob up to smax = 0, prob0 = 1
+    prob[1:smax] <<- 0
+    prob0 <<- 1
   }
   
   # equivalent of Stallard and Todd's get_prob(i, si, p)
