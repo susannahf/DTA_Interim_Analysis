@@ -18,7 +18,7 @@
 # they will then be able to be accessed as normal, and set using <<-
 
 # output from c program is: (starting with i=1) is from get_power_and_n
-# i, lower[i], upper[i], 1-pcross_low2, pcross_low, alpha_u(i,nmax), alpha_l(i, nmax)
+# i, lower[i], upper[i], 1-pcross_up, pcross_low, alpha_u(i,nmax), alpha_l(i, nmax)
 
 uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # things that need to be globally accessible happen here
@@ -49,13 +49,14 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # 
   # nmax-=GROUP;
   # 
-  # p=P0
-  
+
   #get_power_and_n(nmax, smax, p0, power0, 1, output); #may not need this other than for output
   # this is the point where the output is given
   
+  ## this is the end of the main calculations
+  ## from here on are the sub-functions
   
-  
+  # calculate upper and lower boundaries
   # equivalent of Stallard and Todd's get_boundary function
   getBoundary <- function(nmax, smax){
     # for n=0, boundaries are at their extremes
@@ -72,7 +73,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       getBoundsAt_i(i, nmax, smax)
     }
     
-    # get_power_and_n(nmax, smax, p, power, 0, output) <- needed for the power search
+    # get_power_and_n(nmax, smax, p1, power, 0, output) <- needed for the power search
   }
   
   # equivalent of Stallard and Todd's get_bounds_i()
@@ -89,33 +90,36 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # needs get_prob, alpha_l, alpha_u
   getBoundsAt_i <- function(i, nmax, smax) {
     
+    # p=P0; <- lets just use p0 to make this clear....
+    stop=FALSE; # should the search stop
+    upset=FALSE; # is upper boundary set for this i
+    lowset=FALSE;  # is lower boundary set for this i
     
-      # this is the  c code:
-      # need to know what these stand for...
-    # p=P0;
-    # stop=0;
-    # upset=0; # is upper boundary set for this i
-    # lowset=0;  # is lower boundary set for this i
-     
-      # if i=1, then the crossing probabilities must be 0
+    
+    
+    # if i=1, then the crossing probabilities must be 0
     if(i==1) {
-      pcross_low=0
-      pcross_low2=0 # not yet sure what these two are
+      pcross_low<-0
+      pcross_up<-0 
+      loopStart<-lowerbound0 # loop from lowerbound[i-1], but if i=1, this is lowerbound0
+    } else {
+      loopStart<-lowerbound[i-1] # loop from this
     }
     
-      # loop si from lower[i-1] to i+1, incrementing, stop if stop==1
-      
-    # for (si=lower[i-1]; stop!=1 && si<=i+1; si++)
-    # {
-      # calculate probability of getting to (si,i) with P(success)=p
-      # I think probsi is p_n(s) in the paper, in which case get_prob uses "a simple path counting method"
+    # loop si from lowerbound[i-1] to i+1
+    # note that loopStart could be -1 (initial setting of lowerbound0)
+    for(si in loopStart:(i+1)) {  
+      # stop if necessary (this is if everything is set)
+      if(stop) break
+    # calculate probability of getting to (si,i) with P(success)=p
+    # I think probsi is p_n(s) in the paper, in which case get_prob uses "a simple path counting method"
     #   /* find prob of getting to si */
     #     if (si>=0) 
     #     {
     #       get_prob(i, si, p);
     #       probsi=prob[si];
     #     }
-      # prob is 0 if si is <0
+    # prob is 0 if si is <0
     #   else
     #     probsi=0.;
     #   
@@ -129,30 +133,30 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     #     if (i%GROUP==0) 
     #     {
     #       /* check to see if P(Si>si) is <= 1-alpha_u */
-    #         if (si==lower[i-1]) pcross_low2=pcross_low; # if si is on the lower boundary, set pcross_low2 ???
+    #         if (si==lower[i-1]) pcross_up=pcross_low; # if si is on the lower boundary, set pcross_up ???
     #         if (upset==0)  # if upper boundary not set
     #         {
-    #           pcross_low2+=probsi; # increment pcrosslow2 by probsci 
-      # the test below is eq 9 from paper, iff pcross_low2 is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to u_n -1)
-      # if si is u_n -1 above, then the below makes sense, because u_n is the upper boundary.
-      # if the test is met, then upper bdy is set to si+1 (=u_n) and upset is set
-    #           if ( pcross_low2 >= 1.-alpha_u(i,nmax) )  
+    #           pcross_up+=probsi; # increment pcrosslow2 by probsci 
+    # the test below is eq 9 from paper, iff pcross_up is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to u_n -1)
+    # if si is u_n -1 above, then the below makes sense, because u_n is the upper boundary.
+    # if the test is met, then upper bdy is set to si+1 (=u_n) and upset is set
+    #           if ( pcross_up >= 1.-alpha_u(i,nmax) )  
     #           {
     #             upper[i]=si+1;
     #             upset=1;
     #           }
     #         }
     #         
-      # this should implement eq 10 from paper.
+    # this should implement eq 10 from paper.
     #         /* and to see if P(Si<si) is > alpha_l */
     #             if (lowset==0) # if lower boundary not set
     #             {
     #               pcross_low+=probsi; # increment pscrosslow by probsci <- this creates the next value of p_l
-      # the test below is eq 10 from paper, iff pcross_low is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to l_n)
-      # if si is ln above, then the below makes sense, because l_n is the lower boundary
-      # and we are testing for > rather than <= so we want the boundary to be si-1
-      # if the test is met, then lower bdy is set to si-1 and lowset is set
-      # pcross_low is set to the probability -probsi, which is the p_l for l_n
+    # the test below is eq 10 from paper, iff pcross_low is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to l_n)
+    # if si is ln above, then the below makes sense, because l_n is the lower boundary
+    # and we are testing for > rather than <= so we want the boundary to be si-1
+    # if the test is met, then lower bdy is set to si-1 and lowset is set
+    # pcross_low is set to the probability -probsi, which is the p_l for l_n
     #               if ( pcross_low > alpha_l(i,nmax) )
     #               {
     #                 lower[i]=si-1;
@@ -167,12 +171,12 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     #     upper[i]=upper[i-1]+1;
     #     lower[i]=lower[i-1];
     #   }   
-    # }
+    }
     
   }
   
   # initialise prob[1:smax] and prob0
-  # equivalent of Stallard and Todd's init_probs(smax)
+  # implements Stallard and Todd's init_probs(smax)
   initProbs <- function(smax) {
     # initialises probability vector up to smax
     # all element of prob up to smax = 0, prob0 = 1
@@ -181,7 +185,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   }
   
   # copy prob to prob_last for 0 to smax
-  # equivalent of Stallard and Todd's update_prob(smax)
+  # implements Stallard and Todd's update_prob(smax)
   updateProb <- function(smax){
     # copy prob to prob_last up to smax
     prob_last[1:smax] <<- prob[1:smax]
