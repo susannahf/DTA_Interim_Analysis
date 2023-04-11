@@ -58,21 +58,16 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   
   # equivalent of Stallard and Todd's get_boundary function
   getBoundary <- function(nmax, smax){
-    # initialise lower and upper boundaries
-    lowerbound <- upperbound <- rep(NA, nmax)
-    # for n=0, their boundaries are at their extremes
-    lowerbound0 = -1 # this makes sure i matches
-    upperbound0 = 1
+    # for n=0, boundaries are at their extremes
+    lowerbound0 <<- -1 
+    upperbound0 <<- 1
     
     # initialise prob[1:smax] and prob0
     initProbs(smax)
     
     for(i in 1:nmax) {
-      # update_prob(smax)
-      # equivalent of Stallard and Todd's update_prob(smax)
-      # copy prob to prob_last
-      prob_last <<- prob
-      prob_last0 <<- prob0
+      # copy prob to prob_last for 0:smax
+      updateProb(smax)
       # get upper and lower boundaries at inspection i
       getBoundsAt_i(i, nmax, smax)
     }
@@ -183,6 +178,14 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     # all element of prob up to smax = 0, prob0 = 1
     prob[1:smax] <<- 0
     prob0 <<- 1
+  }
+  
+  # copy prob to prob_last for 0 to smax
+  # equivalent of Stallard and Todd's update_prob(smax)
+  updateProb <- function(smax){
+    # copy prob to prob_last up to smax
+    prob_last[1:smax] <<- prob[1:smax]
+    prob_last0 <<- prob0
   }
   
   # equivalent of Stallard and Todd's get_prob(i, si, p)
