@@ -25,7 +25,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # this is kind of the equivalent of main() in Stallard and Todd
   
   # define globally accessible variables
-  prob <- prob_last <- lowerbound <- uppoerbound <- rep(NA, nmax)
+  prob <- prob_last <- lowerbound <- upperbound <- rep(NA, nmax)
   prob0 <- prob_last0 <- lowerbound0 <- upperbound0 <- NA
 
   
@@ -94,7 +94,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     stop=FALSE; # should the search stop
     upset=FALSE; # is upper boundary set for this i
     lowset=FALSE;  # is lower boundary set for this i
-    
+    probsi = 0 # I think probsi is p_n(s) in the paper
     
     
     # if i=1, then the crossing probabilities must be 0
@@ -111,17 +111,14 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     for(si in loopStart:(i+1)) {  
       # stop if necessary (this is if everything is set)
       if(stop) break
-    # calculate probability of getting to (si,i) with P(success)=p
-    # I think probsi is p_n(s) in the paper, in which case get_prob uses "a simple path counting method"
-    #   /* find prob of getting to si */
-    #     if (si>=0) 
-    #     {
-    #       get_prob(i, si, p);
-    #       probsi=prob[si];
-    #     }
-    # prob is 0 if si is <0
-    #   else
-    #     probsi=0.;
+      # calculate probability of getting to (si,i) with P(success)=p
+      # I think probsi is p_n(s) in the paper, in which case get_prob uses "a simple path counting method"
+      #/* find prob of getting to si */
+      if(si>=0) {
+        getProb(i, si, p0);
+        probsi=prob[si];
+      }
+      else probsi=0 # prob is 0 if si is <0
     #   
     #   I think this bit below (only checking every group) is not relevant for our case
     #   /* boundaries for binomial data with GROUP>1 are given by calculations
@@ -192,14 +189,28 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     prob_last0 <<- prob0
   }
   
-  # equivalent of Stallard and Todd's get_prob(i, si, p)
   # finds probability of getting to (si,i) with P(success)=p
   # I think this is p_n(s) in the paper, which uses "a simple path counting method"
-  # set prob[si] = 0
-  # if si>0 and si-1>lower[i-1] and si-1<upper[i-1] # si-1 did not cross bdy at i-1
-  # prob[si] = prob[si] + prob_last[si-1]*p
-  # if si>lower[i-1] and si<upper[i-1] # si did not cross bdy at i-1
-  # prob[si] = prob[si] + prob_last[si]*(1-p)
+  # implements Stallard and Todd's get_prob(i, si, p)
+  getProb <- function(i, si, p) {
+    #initialise prob[si]
+    prob[si] <<- 0
+    # handle boundaries
+    if(i=1) {
+      lastlowerbound <- lowerbound0
+      lastupperbound <- upperbound0
+      lastproblast <- prob_last0
+    } else {
+      lastlowerbound <-lowerbound[i-1]
+      lastupperbound <- upperbound[i-1]
+      lastproblast <- prob_last[i-1]
+    }
+    
+    if(si>0 && (si-1)>lastlowerbound && (si-1)<lastupperbound) { # si-1 did not cross bdy at i-1
+      prob[si] = prob[si] + lastproblast*p }
+    if(si>lastlowerbound && si<lastupperbound) { # si did not cross bdy at i-1
+      prob[si] = prob[si] + prob_last[si]*(1-p) }
+  }
   
   # equivalent of Stallard and Todd's alpha_l()
   # spending function for triangular test
