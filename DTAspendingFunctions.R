@@ -80,7 +80,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       # copy prob to prob_last for 0:smax
       updateProb(smax)
       # get upper and lower boundaries at inspection i
-      getBoundsAt_i(i, nmax, smax)
+      #getBoundsAt_i(i, nmax, smax)
     }
     
     # get_power_and_n(nmax, smax, p1, power, 0, output) <- needed for the power search
@@ -115,11 +115,6 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     } else {
       loopStart<-lowerbound[i-1] # loop from this
     }
-    
-    print(i)
-    print(lowerbound0)
-    print(lowerbound)
-    print(loopStart)
     
     # loop si from lowerbound[i-1] to i+1
     # note that loopStart could be -1 (initial setting of lowerbound0)
