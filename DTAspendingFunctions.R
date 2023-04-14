@@ -196,7 +196,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     #initialise prob[si]
     prob[si] <<- 0
     # handle boundaries
-    if(i=1) {
+    if(i==1) {
       lastlowerbound <- lowerbound0
       lastupperbound <- upperbound0
       lastproblast <- prob_last0
@@ -253,10 +253,5 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
 
 
 
-# internal testing (to remove later)
 
-nmax=smax=9999
-p0=0.003
-p1=0.006 # we may not need this
-power=0.8 # we may not need this
 
