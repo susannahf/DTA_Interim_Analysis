@@ -29,29 +29,39 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   prob0 <- prob_last0 <- lowerbound0 <- upperbound0 <- NA
 
   
-  # call getBoundary() in a searching loop to find nmax such that nmax<NMAX+1 
-  # and power is closest to specified power (but a bit less)
-  # this is needed to get the defined power because the lower boundary is defined by (1-alpha) and not beta
-  # need to determine what nmax actually is...
-  # /* search starts looking every GINC and is refined to GINC/10  ... 1 */
-  #   for (g_inc=GINC; g_inc>=1; g_inc/=10)
-  #   {
-  #     if (g_inc==GINC) g_start=GSTART;
-  #     else g_start=(int)(nmax/GROUP)-19*g_inc;
-  #     power1[0]=0.;
-  #     for (nmax=g_start*GROUP; nmax<NMAX_PLUS_1 && power1[0]<POWER;
-  #          nmax+=g_inc*GROUP)
-  #     {
-  #       get_boundary(nmax, smax, power1, output);
-  #       printf("nmax=%i: power at p=%f = %f\n", nmax,P1,power1[0]);
-  #     }
-  #   }
-  # 
-  # nmax-=GROUP;
-  # 
+  # now we need to define all the subfunctions.
+  # the actual function that runs the code is main(), which is called right at the end
 
-  #get_power_and_n(nmax, smax, p0, power0, 1, output); #may not need this other than for output
-  # this is the point where the output is given
+  
+  main <- function(p0, p1, alpha, power, nmax, smax) {
+    # testing only
+    getBoundary(nmax, smax)
+    
+    
+    # call getBoundary() in a searching loop to find nmax such that nmax<NMAX+1 
+    # and power is closest to specified power (but a bit less)
+    # this is needed to get the defined power because the lower boundary is defined by (1-alpha) and not beta
+    # need to determine what nmax actually is...
+    # /* search starts looking every GINC and is refined to GINC/10  ... 1 */
+    #   for (g_inc=GINC; g_inc>=1; g_inc/=10)
+    #   {
+    #     if (g_inc==GINC) g_start=GSTART;
+    #     else g_start=(int)(nmax/GROUP)-19*g_inc;
+    #     power1[0]=0.;
+    #     for (nmax=g_start*GROUP; nmax<NMAX_PLUS_1 && power1[0]<POWER;
+    #          nmax+=g_inc*GROUP)
+    #     {
+    #       get_boundary(nmax, smax, power1, output);
+    #       printf("nmax=%i: power at p=%f = %f\n", nmax,P1,power1[0]);
+    #     }
+    #   }
+    # 
+    # nmax-=GROUP;
+    # 
+    
+    #get_power_and_n(nmax, smax, p0, power0, 1, output); #may not need this other than for output
+    # this is the point where the output is given
+  }
   
   ## this is the end of the main calculations
   ## from here on are the sub-functions
@@ -105,6 +115,11 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     } else {
       loopStart<-lowerbound[i-1] # loop from this
     }
+    
+    print(i)
+    print(lowerbound0)
+    print(lowerbound)
+    print(loopStart)
     
     # loop si from lowerbound[i-1] to i+1
     # note that loopStart could be -1 (initial setting of lowerbound0)
@@ -238,6 +253,8 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # some sort of integration helper, probably don't need
   
   
+  # now that we've defined all the functions, we can call main()
+  main(p0, p1, alpha, power, nmax, smax)
   
   
 }

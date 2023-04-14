@@ -19,7 +19,7 @@ alpha=0.05
 
 # Test 2: does the code even run?
 test2 <- try(uberfunction(p0, p1, alpha, power, nmax, smax))
-if(!inherits(test1, "try-error")) {
+if(!inherits(test2, "try-error")) {
   print("Test2 passed: uberfunction runs.")
 }
 
