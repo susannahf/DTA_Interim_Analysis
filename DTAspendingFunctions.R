@@ -251,6 +251,16 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # now that we've defined all the functions, we can call main()
   main(p0, p1, alpha, power, nmax, smax)
   
+  # output all global variables 
+  # (initially for testing, but probably useful in the end too)
+  # define globally accessible variables
+  outlist <- list()
+  outlist$lowerbound <- c(lowerbound0, lowerbound)
+  outlist$upperbound <- c(upperbound0, upperbound)
+  outlist$prob <- c(prob0, prob)
+  outlist$prob_last <- c(prob_last0, prob_last)
+  
+  return(outlist)
   
 }
 
