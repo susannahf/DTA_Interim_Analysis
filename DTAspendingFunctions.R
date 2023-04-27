@@ -75,12 +75,12 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     
     # initialise prob[1:smax] and prob0
     initProbs(smax)
-    
+
     for(i in 1:nmax) {
       # copy prob to prob_last for 0:smax
       updateProb(smax)
       # get upper and lower boundaries at inspection i
-      #getBoundsAt_i(i, nmax, smax)
+      getBoundsAt_i(i, nmax, smax)
     }
     
     # get_power_and_n(nmax, smax, p1, power, 0, output) <- needed for the power search
@@ -139,20 +139,20 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     #   */
     #     if (i%GROUP==0) 
     #     {
-    #       /* check to see if P(Si>si) is <= 1-alpha_u */
-    #         if (si==lower[i-1]) pcross_up=pcross_low; # if si is on the lower boundary, set pcross_up ???
-    #         if (upset==0)  # if upper boundary not set
-    #         {
-    #           pcross_up+=probsi; # increment pcrosslow2 by probsci 
-    # the test below is eq 9 from paper, iff pcross_up is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to u_n -1)
-    # if si is u_n -1 above, then the below makes sense, because u_n is the upper boundary.
-    # if the test is met, then upper bdy is set to si+1 (=u_n) and upset is set
-    #           if ( pcross_up >= 1.-alpha_u(i,nmax) )  
-    #           {
-    #             upper[i]=si+1;
-    #             upset=1;
-    #           }
-    #         }
+    # check to see if P(Si>si) is <= 1-alpha_u */
+      if (si==loopStart) pcross_up <- pcross_low; # if si is on the lower boundary, set pcross_up ???
+      if (upset==0)  # if upper boundary not set
+      {
+        pcross_up <- pcross_up + probsi; # increment pcrosslow2 by probsci 
+        # the test below is eq 9 from paper, iff pcross_up is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to u_n -1)
+        # if si is u_n -1 above, then the below makes sense, because u_n is the upper boundary.
+        # if the test is met, then upper bdy is set to si+1 (=u_n) and upset is set
+        if ( pcross_up >= 1-alpha_u(i,nmax) )  
+        {
+          upperbound[i]=si+1;
+          upset=1;
+        }
+      }
     #         
     # this should implement eq 10 from paper.
     #         /* and to see if P(Si<si) is > alpha_l */
@@ -229,6 +229,29 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # equivalent of Stallard and Todd's alpha_u()
   # spending function for triangular test
   # needs set_std_para_grp, prob_cross_lwr
+  alpha_u <- function(i, nmax) {
+#     /* Triangular test with Vmax=1 has upper slope=intercept
+#     value is given by Whitehead's 4.11.1
+# */
+# double alphau, pcross;
+# PARA_GRP *pg;
+# FLAG flag;
+# 
+# alphau=0.025;
+# bd.intercept=bd.upr_grad=sqrt(-log(2.*alphau)/2.);
+# bd.lwr_grad=3.*bd.upr_grad;
+# bd.vert_boundary_v=1.;
+# 
+# pg=set_std_para_grp();
+# flag=dum;
+# 
+# /* upper bdry */
+# pg->improvement=4.*bd.upr_grad;
+# pcross= prob_cross_lwr(0.97*(double)i/nmax, pg, flag);  /* truncation at 97% */
+# if (pcross<=SMALL*i) pcross=SMALL*i;            
+#                     /* stops very small increases early on*/
+# return pcross;
+  }
   
   # equivalent of Stallard and Todd's set_std_para_grp()
   # sets some constants afaict

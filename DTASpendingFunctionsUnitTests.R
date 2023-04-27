@@ -23,3 +23,7 @@ if(!inherits(test2, "try-error")) {
   print("Test2 passed: uberfunction runs.")
 }
 
+# now let's worry about the output
+testout <- uberfunction(p0, p1, alpha, power, nmax, smax)
+
+
