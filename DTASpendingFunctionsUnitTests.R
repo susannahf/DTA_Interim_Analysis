@@ -77,17 +77,17 @@ if(test3[t==1] == (1-alpha)) {
 
 
 # triangular test needs single values of t for testing
-t=0.5
 
 # Test 4: Stallard and Todd alpha_u
-test4 <- try(TriangularTest_alpha_u(alpha, t))
+test4 <- try(sapply(t, TriangularTest_alpha_u, alpha=alpha))
 if(!inherits(test4, "try-error")) {
   print("Test 4: can calculate Triangular test alpha_u")
+  plot(t, test4, 'l', main="Test 4: Triangular test alpha_u" )
 } else { message("Test 4 failed.")}
 
 # test extreme values
 
-if(TriangularTest_alpha_u(alpha, 0)==1) {
+if(TriangularTest_alpha_u(alpha, 0)==0) {
   print("Test 4: alpha_u(0)=0")
 } else  message("Test 4 failed.")
 

@@ -49,10 +49,15 @@ TriangularTest_alpha_u <- function(alpha, t){
   
   # constant
   c <- sqrt(-1 * log(2*alpha) / 2)
+  #print(paste0("c=",c))
   
   # first term
   term1arg <- c * (1- 3*t) / sqrt(t)
   term1 <- dnorm(term1arg) # lower case phi is std normal density
+  #print(paste0("term1=",term1))
+  
+  # handle where term1 is zero already...
+  if(term1 == 0) return(0)
   
   # helper function to calculate the thing that's summed
   sumarg <- function(i, c, t) {
@@ -69,8 +74,17 @@ TriangularTest_alpha_u <- function(alpha, t){
   # sum term
   maxi = 500
   is <- 0:maxi
-  sumterms <- sapply(is, sumarg, c=c, t=t)
+  tolerance <- 1e-11
+  sumterms <- rep(0, maxi+1)
+  for(i in is) {
+    sumterms[i+1] <- sumarg(i, c, t)
+    if(abs(sumterms[i+1]) <tolerance) break # stop the loop when convergence
+  }
+  #print("sumterms:")
+  #print(sumterms)
   term2 <- sum(sumterms)
+  #print(paste0("term2=",term2))
+  
   
   return(term1 * term2)
 }
