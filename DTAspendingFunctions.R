@@ -8,7 +8,6 @@
 # All mistakes are mine.
 
 
-
 # REMEMBER, c vectors start at 0, and R vectors start at 1!
 # so any initial starting points are coded here as var0 rather than var[0]
 # this will need a bit of care, but I think is safer than doing everything as i+1

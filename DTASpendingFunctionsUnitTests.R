@@ -4,11 +4,14 @@
 # because re-implementing a huge C code base without testing is just stupid
 # and I finally realised that
 
+print("")
+print("Testing DTASpendingFunctions.R")
+
 # Test 1: will it even source?
 test1 <- try(source("DTAspendingFunctions.R"))
 if(!inherits(test1, "try-error")) {
   print("Test1 passed: can source DTAspendingFunctions.R")
-}
+} else { print("Test 2 failed.")}
 
 # reasonable test values
 nmax=smax=9999
@@ -21,9 +24,26 @@ alpha=0.05
 test2 <- try(uberfunction(p0, p1, alpha, power, nmax, smax))
 if(!inherits(test2, "try-error")) {
   print("Test2 passed: uberfunction runs.")
-}
+} else { print("Test 2 failed.")}
 
 # now let's worry about the output
-testout <- uberfunction(p0, p1, alpha, power, nmax, smax)
+#testout <- uberfunction(p0, p1, alpha, power, nmax, smax)
 
+#############################################
 
+print("")
+print("Testing SpendingFunctions.R")
+
+# also test the spending functions themselves
+# Test 1: will it even source?
+test1 <- try(source("SpendingFunctions.R"))
+if(!inherits(test1, "try-error")) {
+  print("Test1 passed: can source SpendingFunctions.R")
+}
+
+# reasonable test values
+nmax=smax=9999
+p0=0.003
+p1=0.006 # we may not need this
+power=0.8 # we may not need this
+alpha=0.05
