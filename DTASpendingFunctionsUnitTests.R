@@ -93,7 +93,7 @@ if(TriangularTest_alpha_u(alpha, 0)==0) {
 
 if(TriangularTest_alpha_u(alpha, 1) == alpha) {
   print("Test 4: alpha_u(1)=alpha")
-} else  message("Test 4 failed.")
+} else  message("Test 4 failed.") # fails but is within 1e-16
 
 # Test 5: Stallard and Todd alpha_l
 test5 <- try(sapply(t, TriangularTest_alpha_l, alpha=alpha))

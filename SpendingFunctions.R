@@ -36,7 +36,7 @@ MillsRatio <- function(x) {
 # this implements equation 3 in Stallard/Todd 2000
 # note that this function can't cope with vector t
 # which is theoretically alpha_u but I suspect is actually alpha_l
-TriangularTest_alpha_u <- function(alpha, t){
+TriangularTest_alpha_l <- function(alpha, t){
   # check that alpha and t are both between 0 and 1
   if(alpha<0 | alpha>1 | t<0 | t>1) {
     error("alpha and t must both be between 0 and 1")
@@ -94,7 +94,7 @@ TriangularTest_alpha_u <- function(alpha, t){
 # this implements equation 4 in Stallard/Todd 2000
 # note that this function can't cope with vector t
 # which is theoretically alpha_l but I suspect is actually alpha_u
-TriangularTest_alpha_l <- function(alpha, t){
+TriangularTest_alpha_u <- function(alpha, t){
   # check that alpha and t are both between 0 and 1
   if(alpha<0 | alpha>1 | t<0 | t>1) {
     error("alpha and t must both be between 0 and 1")
