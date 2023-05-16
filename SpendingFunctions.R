@@ -45,7 +45,8 @@ TriangularTest_alpha_u <- function(alpha, t){
     error("alpha and t must both be single numbers")
 
   # if t > 0.97, return alpha
-  if(t>0.97) return(alpha)
+  #if(t>0.9999) return(alpha)
+  # not needed for this implementation
   
   # constant
   c <- sqrt(-1 * log(2*alpha) / 2)
@@ -72,9 +73,9 @@ TriangularTest_alpha_u <- function(alpha, t){
   }
     
   # sum term
-  maxi = 500
-  is <- 0:maxi
-  tolerance <- 1e-11
+  maxi = 500 # changing maxi doesn't seem to affect the oddness 
+  is <- 0:maxi 
+  tolerance <- 1e-11 # nor does changing the tolerance
   sumterms <- rep(0, maxi+1)
   for(i in is) {
     sumterms[i+1] <- sumarg(i, c, t)

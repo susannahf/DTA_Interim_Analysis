@@ -94,3 +94,21 @@ if(TriangularTest_alpha_u(alpha, 0)==0) {
 if(TriangularTest_alpha_u(alpha, 1) == alpha) {
   print("Test 4: alpha_u(1)=alpha")
 } else  message("Test 4 failed.")
+
+# Test 5: Stallard and Todd alpha_l
+test5 <- try(sapply(t, TriangularTest_alpha_l, alpha=alpha))
+if(!inherits(test5, "try-error")) {
+  print("Test 5: can calculate Triangular test alpha_l")
+  plot(t, test5, 'l', main="Test 5: Triangular test alpha_l" )
+} else { message("Test 5 failed.")}
+
+# test extreme values
+
+if(TriangularTest_alpha_l(alpha, 0)==0) {
+  print("Test 5: alpha_l(0)=0")
+} else  message("Test 5 failed.")
+
+if(TriangularTest_alpha_l(alpha, 1) == 1-alpha) {
+  print("Test 5: alpha_l(1)=1-alpha")
+} else  message("Test 5 failed.")
+
