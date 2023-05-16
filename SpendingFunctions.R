@@ -64,9 +64,9 @@ TriangularTest_alpha_u <- function(alpha, t){
     # first term
     term1 <- ((-1)^i) * exp(2 * i * (i-1) * (c^2) * (1- (1/t)) )
     # second term
-    term2 <- MillsRatio( c * (2*i + 1 - t) / sqrt(t) )
+    term2 <- MillsRatio( c * (2*i + 1 - 3*t) / sqrt(t) )
     # third term
-    term3 <- MillsRatio( c * (2*i + 1 + t) / sqrt(t) )
+    term3 <- MillsRatio( c * (2*i + 1 + 3*t) / sqrt(t) )
     # whole thing
     return(term1 * (term2 + term3))
   }

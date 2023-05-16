@@ -43,7 +43,7 @@ if(!inherits(test1, "try-error")) {
 
 # reasonable test values
 alpha=0.05
-t <- seq(0,1,0.01)
+t <- seq(0,1,0.001)
 
 # Test 2: Kim and DeMets alpha_u
 test2 <- try(KimDeMets_alpha_u(alpha, t))
