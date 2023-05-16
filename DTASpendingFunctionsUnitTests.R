@@ -42,7 +42,7 @@ if(!inherits(test1, "try-error")) {
 } else { message("Test 1 failed.")}
 
 # reasonable test values
-alpha=0.05
+alpha=0.025
 t <- seq(0,1,0.001)
 
 # Test 2: Kim and DeMets alpha_u
