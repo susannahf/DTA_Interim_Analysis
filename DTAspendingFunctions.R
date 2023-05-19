@@ -7,7 +7,6 @@
 # this is re-implemented from Stallard and Todd's original c code
 # All mistakes are mine.
 
-
 # REMEMBER, c vectors start at 0, and R vectors start at 1!
 # so any initial starting points are coded here as var0 rather than var[0]
 # this will need a bit of care, but I think is safer than doing everything as i+1
@@ -19,6 +18,9 @@
 # output from c program is: (starting with i=1) is from get_power_and_n
 # i, lower[i], upper[i], 1-pcross_up, pcross_low, alpha_u(i,nmax), alpha_l(i, nmax)
 
+# load spending functions
+source("SpendingFunctions.R")
+
 uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # things that need to be globally accessible happen here
   # this is kind of the equivalent of main() in Stallard and Todd
@@ -26,13 +28,18 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # define globally accessible variables
   prob <- prob_last <- lowerbound <- upperbound <- rep(NA, nmax)
   prob0 <- prob_last0 <- lowerbound0 <- upperbound0 <- NA
+  
+  # spending functions
+  spendfunc <- "Triangular"
 
   
   # now we need to define all the subfunctions.
   # the actual function that runs the code is main(), which is called right at the end
 
   
-  main <- function(p0, p1, alpha, power, nmax, smax) {
+  main <- function(p0, p1, alpha, power, nmax, smax, spend = "Triangular") {
+    spendfunc <<- spend
+    
     # testing only
     getBoundary(nmax, smax)
     
@@ -221,54 +228,29 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       prob[si] = prob[si] + prob_last[si]*(1-p) }
   }
   
-  # equivalent of Stallard and Todd's alpha_l()
-  # spending function for triangular test
-  # needs set_std_para_grp, prob_cross_lwr
-  
-  # equivalent of Stallard and Todd's alpha_u()
-  # spending function for triangular test
-  # needs set_std_para_grp, prob_cross_lwr
-  alpha_u <- function(i, nmax) {
-#     /* Triangular test with Vmax=1 has upper slope=intercept
-#     value is given by Whitehead's 4.11.1
-# */
-# double alphau, pcross;
-# PARA_GRP *pg;
-# FLAG flag;
-# 
-# alphau=0.025;
-# bd.intercept=bd.upr_grad=sqrt(-log(2.*alphau)/2.);
-# bd.lwr_grad=3.*bd.upr_grad;
-# bd.vert_boundary_v=1.;
-# 
-# pg=set_std_para_grp();
-# flag=dum;
-# 
-# /* upper bdry */
-# pg->improvement=4.*bd.upr_grad;
-# pcross= prob_cross_lwr(0.97*(double)i/nmax, pg, flag);  /* truncation at 97% */
-# if (pcross<=SMALL*i) pcross=SMALL*i;            
-#                     /* stops very small increases early on*/
-# return pcross;
+  # alpha_l calculates the spending function for the lower bound
+  # using functions from SpendingFunctions.R
+  alpha_l <- function(i, nmax) {
+    t <- i/nmax
+    if(spendfunc=="Triangular")
+      return(TriangularTest_alpha_l(alpha,t))
+    else if(spendfunc=="Simple")
+      return(KimDeMets_alpha_l(alpha,t))
+    else
+      stop(paste("unrecognised spending function: ",spendfunc))
   }
   
-  # equivalent of Stallard and Todd's set_std_para_grp()
-  # sets some constants afaict
-  
-  # equivalent of Stallard and Todd's prob_cross_lwr()
-  # calculates the probability of crossing the lower boundary (p_L?)
-  # needs integrate, mills_ratio
-  
-  # equivalent of Stallard and Todd's mills_ratio()
-  # calculates R(x) for the triangular test
-  
-  # equivalent of Stallard and Todd's integrate()
-  # integrates... I guess. May be able to use an internal R function, like, um, integrate()?
-  # needs gauleg
-  
-  # equivalent of Stallard and Todd's gauleg()
-  # some sort of integration helper, probably don't need
-  
+  # alpha_u calculates the spending function for the upper bound
+  # using functions from SpendingFunctions.R
+  alpha_u <- function(i, nmax) {
+    t <- i/nmax
+    if(spendfunc=="Triangular")
+      return(TriangularTest_alpha_u(alpha,t))
+    else if(spendfunc=="Simple")
+      return(KimDeMets_alpha_u(alpha,t))
+    else
+      stop(paste("unrecognised spending function: ",spendfunc))
+  }
   
   # now that we've defined all the functions, we can call main()
   main(p0, p1, alpha, power, nmax, smax)
