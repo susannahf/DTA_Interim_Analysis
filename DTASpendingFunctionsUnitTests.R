@@ -112,3 +112,5 @@ if(TriangularTest_alpha_l(alpha, 1) == 1-alpha) {
   print("Test 5: alpha_l(1)=1-alpha")
 } else  message("Test 5 failed.")
 
+
+

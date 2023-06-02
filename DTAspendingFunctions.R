@@ -28,9 +28,10 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # define globally accessible variables
   prob <- prob_last <- lowerbound <- upperbound <- rep(NA, nmax)
   prob0 <- prob_last0 <- lowerbound0 <- upperbound0 <- NA
+  pcross_up <- pcross_low <- NA
   
   # spending functions
-  spendfunc <- "Triangular"
+  spendfunc <- "Simple"
 
   
   # now we need to define all the subfunctions.
@@ -105,7 +106,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # */
   # needs get_prob, alpha_l, alpha_u
   getBoundsAt_i <- function(i, nmax, smax) {
-    
+
     # p=P0; <- lets just use p0 to make this clear....
     stop=FALSE; # should the search stop
     upset=FALSE; # is upper boundary set for this i
@@ -114,12 +115,13 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     
     # if i=1, then the crossing probabilities must be 0
     if(i==1) {
-      pcross_low<-0
-      pcross_up<-0 
+      pcross_low<<-0
+      pcross_up<<-0 
       loopStart<-lowerbound0 # loop from lowerbound[i-1], but if i=1, this is lowerbound0
     } else {
       loopStart<-lowerbound[i-1] # loop from this
     }
+    
     
     # loop si from lowerbound[i-1] to i+1
     # note that loopStart could be -1 (initial setting of lowerbound0)
@@ -129,11 +131,12 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       # calculate probability of getting to (si,i) with P(success)=p
       # I think probsi is p_n(s) in the paper, in which case get_prob uses "a simple path counting method"
       #/* find prob of getting to si */
-      if(si>=0) {
+      if(si>0) {
         getProb(i, si, p0);
-        probsi=prob[si];
-      }
-      else probsi=0 # prob is 0 if si is <0
+        probsi<-prob[si];
+      } else if(si==0) {
+        probsi<- prob0
+      } else { probsi<-0 } # prob is 0 if si is <0
       #   
       #   I think this bit below (only checking every group) is not relevant for our case
       #   /* boundaries for binomial data with GROUP>1 are given by calculations
@@ -145,17 +148,18 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       #     if (i%GROUP==0) 
       #     {
       # check to see if P(Si>si) is <= 1-alpha_u */
-      if (si==loopStart) pcross_up <- pcross_low; # if si is on the lower boundary, set pcross_up ???
+      if (si==loopStart) pcross_up <<- pcross_low; # if si is on the lower boundary, set pcross_up ???
+     
       if (upset==0)  # if upper boundary not set
       {
-        pcross_up <- pcross_up + probsi; # increment pcrosslow2 by probsci 
+        pcross_up <<- pcross_up + probsi; # increment pcrosslow2 by probsci 
+        
         # the test below is eq 9 from paper, iff pcross_up is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to u_n -1)
         # if si is u_n -1 above, then the below makes sense, because u_n is the upper boundary.
         # if the test is met, then upper bdy is set to si+1 (=u_n) and upset is set
-        print(paste0("pcross_up:",pcross_up))
         if ( pcross_up >= 1-alpha_u(i,nmax) )  
         {
-          upperbound[i]=si+1;
+          upperbound[i]<<-si+1;
           upset=1;
         }
       }
@@ -164,7 +168,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       #        /* and to see if P(Si<si) is > alpha_l */
       if (lowset==0) # if lower boundary not set
       {
-        pcross_low <- pcross_low + probsi; # increment pscrosslow by probsci <- this creates the next value of p_l
+        pcross_low <<- pcross_low + probsi; # increment pscrosslow by probsci <- this creates the next value of p_l
         # the test below is eq 10 from paper, iff pcross_low is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to l_n)
         # if si is ln above, then the below makes sense, because l_n is the lower boundary
         # and we are testing for > rather than <= so we want the boundary to be si-1
@@ -172,8 +176,8 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
         # pcross_low is set to the probability -probsi, which is the p_l for l_n
         if ( pcross_low > alpha_l(i,nmax) )
         {
-          lower[i]=si-1;
-          pcross_low <- pcross_low -probsi;
+          lowerbound[i] <<-si-1;
+          pcross_low <<- pcross_low -probsi;
           lowset=1;
         }
       }
