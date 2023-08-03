@@ -14,16 +14,16 @@ if(!inherits(test1, "try-error")) {
 } else { message("Test 2 failed.")}
 
 # reasonable test values
-nmax=smax=9999
-p0=0.003
+nmax=smax=999
+p0=0.03
 p1=0.006 # we may not need this
 power=0.8 # we may not need this
 alpha=0.05
 
 # Test 2: does the code even run?
-test2 <- try(uberfunction(p0, p1, alpha, power, nmax, smax))
+test2 <- try(STbounds(p0, p1, alpha, power, nmax, smax))
 if(!inherits(test2, "try-error")) {
-  print("Test2 passed: uberfunction runs.")
+  print("Test2 passed: STbounds runs.")
 } else { message("Test 2 failed.")}
 
 # now let's worry about the output

@@ -21,7 +21,7 @@
 # load spending functions
 source("SpendingFunctions.R")
 
-uberfunction <- function(p0, p1, alpha, power, nmax, smax){
+STbounds <- function(p0, p1, alpha, power, nmax, smax){
   # things that need to be globally accessible happen here
   # this is kind of the equivalent of main() in Stallard and Todd
   
@@ -33,12 +33,11 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # spending functions
   spendfunc <- "Simple"
 
-  
   # now we need to define all the subfunctions.
   # the actual function that runs the code is main(), which is called right at the end
 
   
-  main <- function(p0, p1, alpha, power, nmax, smax, spend = "Triangular") {
+  main <- function(p0, p1, alpha, power, nmax, smax, spend = "Simple") {
     spendfunc <<- spend
     
     # testing only
@@ -107,8 +106,9 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # needs get_prob, alpha_l, alpha_u
   getBoundsAt_i <- function(i, nmax, smax) {
 
+    #print(paste("setting bounds at",i))
     # p=P0; <- lets just use p0 to make this clear....
-    stop=FALSE; # should the search stop
+    stopflag=FALSE; # should the search stop
     upset=FALSE; # is upper boundary set for this i
     lowset=FALSE;  # is lower boundary set for this i
     probsi = 0 # I think probsi is p_n(s) in the paper
@@ -127,7 +127,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
     # note that loopStart could be -1 (initial setting of lowerbound0)
     for(si in loopStart:(i+1)) {  
       # stop if necessary (this is if everything is set)
-      if(stop) break
+      if(stopflag) break
       # calculate probability of getting to (si,i) with P(success)=p
       # I think probsi is p_n(s) in the paper, in which case get_prob uses "a simple path counting method"
       #/* find prob of getting to si */
@@ -135,6 +135,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
         getProb(i, si, p0);
         probsi<-prob[si];
       } else if(si==0) {
+        getProb(i, si, p0)
         probsi<- prob0
       } else { probsi<-0 } # prob is 0 if si is <0
       #   
@@ -150,23 +151,25 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       # check to see if P(Si>si) is <= 1-alpha_u */
       if (si==loopStart) pcross_up <<- pcross_low; # if si is on the lower boundary, set pcross_up ???
      
-      if (upset==0)  # if upper boundary not set
+      if (!upset)  # if upper boundary not set
       {
+        #print(paste0("i:", i," si:", si, " pcross up:", pcross_up, " probsi:", probsi))
         pcross_up <<- pcross_up + probsi; # increment pcrosslow2 by probsci 
         
         # the test below is eq 9 from paper, iff pcross_up is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to u_n -1)
         # if si is u_n -1 above, then the below makes sense, because u_n is the upper boundary.
         # if the test is met, then upper bdy is set to si+1 (=u_n) and upset is set
+        #print(paste0("si:", si, " pcross up:", pcross_up, ", 1-alphau:", 1-alpha_u(i, nmax)))
         if ( pcross_up >= 1-alpha_u(i,nmax) )  
         {
           upperbound[i]<<-si+1;
-          upset=1;
+          upset=T;
         }
       }
       #         
       # this should implement eq 10 from paper.
       #        /* and to see if P(Si<si) is > alpha_l */
-      if (lowset==0) # if lower boundary not set
+      if (!lowset) # if lower boundary not set
       {
         pcross_low <<- pcross_low + probsi; # increment pscrosslow by probsci <- this creates the next value of p_l
         # the test below is eq 10 from paper, iff pcross_low is sum(p_L, 1 to n-1) and probsi is sum(p_n, 0 to l_n)
@@ -174,15 +177,19 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
         # and we are testing for > rather than <= so we want the boundary to be si-1
         # if the test is met, then lower bdy is set to si-1 and lowset is set
         # pcross_low is set to the probability -probsi, which is the p_l for l_n
+        #print(paste0("i", i, "si:", si, " pcross low:", pcross_low, ", alphal:", alpha_l(i, nmax)))
         if ( pcross_low > alpha_l(i,nmax) )
         {
           lowerbound[i] <<-si-1;
           pcross_low <<- pcross_low -probsi;
-          lowset=1;
+          lowset=T;
         }
       }
-      if (lowset==1 && upset==1) stop=1; # stop if both set
+      if (lowset && upset) stopflag=T; # stop if both set
     }
+    # if lowset or upset isn't set...
+    if(!lowset) lowerbound[i] <<- lowerbound[i-1]
+    if(!upset) upperbound[i] <<- upperbound[i-1]+1
     #   else # this deals with situations where this i isn't divisible by group
     #   {
     #     upper[i]=upper[i-1]+1;
@@ -214,7 +221,8 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   # implements Stallard and Todd's get_prob(i, si, p)
   getProb <- function(i, si, p) {
     #initialise prob[si]
-    prob[si] <<- 0
+    probsi <<- 0
+    
     # handle boundaries
     if(i==1) {
       lastlowerbound <- lowerbound0
@@ -225,12 +233,71 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
       lastupperbound <- upperbound[i-1]
       lastproblast <- prob_last[i-1]
     }
+    if(si==0) problastsi = prob_last0
+    else problastsi = prob_last[si]
     
     if(si>0 && (si-1)>lastlowerbound && (si-1)<lastupperbound) { # si-1 did not cross bdy at i-1
-      prob[si] = prob[si] + lastproblast*p }
+      probsi <- probsi + lastproblast*p }
     if(si>lastlowerbound && si<lastupperbound) { # si did not cross bdy at i-1
-      prob[si] = prob[si] + prob_last[si]*(1-p) }
+      probsi <- probsi + problastsi*(1-p) }
+    
+    if(si==0)
+      prob0 <<- probsi
+    else
+      prob[si] <<-probsi
+    
   }
+  
+  # implements Stallard and Todd's get_power_and_n(nmax, smax, p, *results, printall, output)
+  # void get_power_and_n(int nmax, int smax, double p, double *results, int printall, FILE* output)
+  # /* calls get_prob with p to get power for boundary obtained previously */
+  #   {
+  #     int i, si;
+  #     double power, n, probsi;
+  #     double pcross_low, pcross_low2, pcross_low_old, pcross_low2_old;
+  #     
+  #     power=0.;
+  #     n=0.;
+  #     pcross_low=0.;
+  #     pcross_low2=1.;
+  #     
+  #     init_probs(smax);
+  #     
+  #     for (i=1; i<=nmax; i++)
+  #     {
+  #       update_prob(smax);
+  #       pcross_low_old=pcross_low;
+  #       pcross_low2_old=pcross_low2;
+  #       for (si=lower[i-1]; si<upper[i]; si++)
+  #       {
+  #         if (si>=0) 
+  #         {
+  #           get_prob(i, si, p);
+  #           probsi=prob[si];
+  #         }
+  #         else
+  #           probsi=0.;
+  #         
+  #         if (si==lower[i-1])
+  #         {
+  #           pcross_low2=pcross_low;
+  #         }
+  #         pcross_low2+=probsi;
+  #         if (si<=lower[i]) pcross_low+=probsi;
+  #       }
+  #       power+=(pcross_low2_old-pcross_low2);
+  #       n+=i*(pcross_low2_old-pcross_low2+pcross_low-pcross_low_old);
+  #       if (printall==1)
+  #       {
+  #         fprintf(output,"%i %i %i  %g %g",
+  #                 i,lower[i],upper[i],1.-pcross_low2,pcross_low);
+  #         fprintf(output,"           %g %g\n",
+  #                 alpha_u(i,nmax),alpha_l(i,nmax));
+  #       }
+  #     }
+  #     results[0]=power;
+  #     results[1]=n;
+  #   }
   
   # alpha_l calculates the spending function for the lower bound
   # using functions from SpendingFunctions.R
@@ -258,7 +325,7 @@ uberfunction <- function(p0, p1, alpha, power, nmax, smax){
   
   # now that we've defined all the functions, we can call main()
   main(p0, p1, alpha, power, nmax, smax)
-  
+
   # output all global variables 
   # (initially for testing, but probably useful in the end too)
   # define globally accessible variables
