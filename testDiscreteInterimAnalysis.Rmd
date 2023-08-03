@@ -440,15 +440,45 @@ The variables we can set are:
 source("DTAspendingFunctions.R")
 
 # test values that compare to above method
-nmax=smax=999
+nmax=smax=200-1
 p0=c(0.6, 0.9) 
 p1=  c(0.8, 0.95) # we may not need this
 power=0.8 # we may not need this
 alpha=0.05
 
-testlow <- DTAspendingboundaries(p0[1],p1[1], alpha=alpha, power=power, ndata=nmax)
-testhigh <- DTAspendingboundaries(p0[2],p1[2], alpha=alpha, power=power, ndata=nmax)
+testse <- DTAspendingboundaries(p0[1],p1[1], alpha=alpha, power=power, ndata=nmax)
+testsp <- DTAspendingboundaries(p0[2],p1[2], alpha=alpha, power=power, ndata=nmax)
 
+# plot the boundaries against the data sets
+x <- 1:nrow(contshort1)
+
+# plot continuous Se and Sp for contshort1
+#Se
+plot(x,contshort1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 1, p0=0.6, p1=0.8", ylab="Sensitivity")
+lines(x, testse$upperbnd, col="red", 'l', lty="dashed")
+lines(x, testse$lowerbnd, col="red", 'l', lty="dotdash")
+lines(x, rep(0.6,200), col="red")
+legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
+#Sp
+plot(x,contshort1$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 1, p0=0.9. p1=0.95", ylab="Specificity")
+lines(x, testsp$upperbnd, col="blue", 'l', lty="dashed")
+lines(x, testsp$lowerbnd, col="blue", 'l', lty="dotdash")
+lines(x, rep(0.9,200), col="blue")
+legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
+
+# plot continuous Se and Sp for contshort2
+#Se
+plot(x,contshort2$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 2, p0=0.6, p1=0.8", ylab="Sensitivity")
+lines(x, testse$upperbnd, col="red", 'l', lty="dashed")
+lines(x, testse$lowerbnd, col="red", 'l', lty="dotdash")
+lines(x, rep(0.6,200), col="red")
+legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
+#Sp
+plot(x,contshort2$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 2, p0=0.9, p1=0.95", ylab="Specificity")
+lines(x, testsp$upperbnd, col="blue", 'l', lty="dashed")
+lines(x, testsp$lowerbnd, col="blue", 'l', lty="dotdash")
+lines(x, rep(0.9,200), col="blue")
+legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
 
 
 
