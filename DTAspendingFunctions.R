@@ -341,13 +341,34 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
 
 
 
+##### applying spending function methods to DTA data
 
 
+## calculating boundaries for DTA data
+# p0thresh: threshold p0 
+# p1thresh: threshold p1
+# alpha: one sided nominal type I error (default 0.05)
+# power: power (default 0.8)
+# ndata: number of data points
+DTAspendingboundaries <- function(p0thresh,p1thresh,alpha=0.05, power=0.8, ndata=1000){
+  
+  # create useful variables
+  # we actually are analysing on 1-Se and 1-Sp, so p0 needs to be 1-p0 
+  p0 <- 1-p0thresh
+  p1 <- 1-p1thresh
+  nmax <- smax <- ndata
 
-
-
-
-
+  # calculate boundaries
+  bnds <- STbounds(p0, p1, alpha, power, nmax, smax)
+  
+  # upper and lower bounds need to be as proportions
+  npoints <- 1:(ndata+1)
+  DTAbnds <- data.frame(upperbnd = bnds$upperbound/npoints, 
+                        lowerbnd = bnds$lowerbound/npoints,
+                        x = npoints)
+  return(DTAbnds)
+  
+}
 
 
 

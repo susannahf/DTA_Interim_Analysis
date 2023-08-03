@@ -15,8 +15,8 @@ if(!inherits(test1, "try-error")) {
 
 # reasonable test values
 nmax=smax=999
-p0=0.03
-p1=0.006 # we may not need this
+p0=0.4
+p1=0.1 # we may not need this
 power=0.8 # we may not need this
 alpha=0.05
 
@@ -26,8 +26,23 @@ if(!inherits(test2, "try-error")) {
   print("Test2 passed: STbounds runs.")
 } else { message("Test 2 failed.")}
 
-# now let's worry about the output
-#testout <- uberfunction(p0, p1, alpha, power, nmax, smax)
+DTAp0=0.6
+DTAp1=0.9
+npts =1000
+
+# Test 3: does the DTA code run?
+test3 <- try(DTAspendingboundaries(DTAp0,DTAp1, ndata=npts))
+if(!inherits(test3, "try-error")) {
+  print("Test3 passed: DTAspendingboundaries runs.")
+} else { message("Test 3 failed.")}
+
+test4 <- DTAspendingboundaries(DTAp0,DTAp1, ndata=npts)
+# Test 4: what do the boundaries look like?
+plot(test4$x,test4$upperbnd,'l',main="Test 4: upper bound")
+plot(test4$x,test4$lowerbnd,'l',main="Test 4: lower bound")
+
+
+
 
 #############################################
 
