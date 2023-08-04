@@ -29,6 +29,8 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
   prob <- prob_last <- lowerbound <- upperbound <- rep(NA, nmax)
   prob0 <- prob_last0 <- lowerbound0 <- upperbound0 <- NA
   pcross_up <- pcross_low <- NA
+  powervals <- data.frame( power0 = c(NA, NA), 
+                           power1 = c(NA, NA))
   
   # spending functions
   spendfunc <- "Simple"
@@ -40,8 +42,9 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
   main <- function(p0, p1, alpha, power, nmax, smax, spend = "Simple") {
     spendfunc <<- spend
     
+    
     # testing only
-    getBoundary(nmax, smax)
+    getBoundary(nmax, smax, "power1")
     
     
     # call getBoundary() in a searching loop to find nmax such that nmax<NMAX+1 
@@ -65,7 +68,7 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
     # nmax-=GROUP;
     # 
     
-    #get_power_and_n(nmax, smax, p0, power0, 1, output); #may not need this other than for output
+    get_power_and_n(nmax, smax, p0, "power0")
     # this is the point where the output is given
   }
   
@@ -74,7 +77,7 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
   
   # calculate upper and lower boundaries
   # equivalent of Stallard and Todd's get_boundary function
-  getBoundary <- function(nmax, smax){
+  getBoundary <- function(nmax, smax, powername){
     # for n=0, boundaries are at their extremes
     lowerbound0 <<- -1 
     upperbound0 <<- 1
@@ -89,7 +92,7 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
       getBoundsAt_i(i, nmax, smax)
     }
     
-    # get_power_and_n(nmax, smax, p1, power, 0, output) <- needed for the power search
+    get_power_and_n(nmax, smax, p1, powername) #<- needed for the power search
   }
   
   # equivalent of Stallard and Todd's get_bounds_i()
@@ -248,56 +251,59 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
     
   }
   
+  
   # implements Stallard and Todd's get_power_and_n(nmax, smax, p, *results, printall, output)
-  # void get_power_and_n(int nmax, int smax, double p, double *results, int printall, FILE* output)
-  # /* calls get_prob with p to get power for boundary obtained previously */
-  #   {
-  #     int i, si;
-  #     double power, n, probsi;
-  #     double pcross_low, pcross_low2, pcross_low_old, pcross_low2_old;
-  #     
-  #     power=0.;
-  #     n=0.;
-  #     pcross_low=0.;
-  #     pcross_low2=1.;
-  #     
-  #     init_probs(smax);
-  #     
-  #     for (i=1; i<=nmax; i++)
-  #     {
-  #       update_prob(smax);
-  #       pcross_low_old=pcross_low;
-  #       pcross_low2_old=pcross_low2;
-  #       for (si=lower[i-1]; si<upper[i]; si++)
-  #       {
-  #         if (si>=0) 
-  #         {
-  #           get_prob(i, si, p);
-  #           probsi=prob[si];
-  #         }
-  #         else
-  #           probsi=0.;
-  #         
-  #         if (si==lower[i-1])
-  #         {
-  #           pcross_low2=pcross_low;
-  #         }
-  #         pcross_low2+=probsi;
-  #         if (si<=lower[i]) pcross_low+=probsi;
-  #       }
-  #       power+=(pcross_low2_old-pcross_low2);
-  #       n+=i*(pcross_low2_old-pcross_low2+pcross_low-pcross_low_old);
-  #       if (printall==1)
-  #       {
-  #         fprintf(output,"%i %i %i  %g %g",
-  #                 i,lower[i],upper[i],1.-pcross_low2,pcross_low);
-  #         fprintf(output,"           %g %g\n",
-  #                 alpha_u(i,nmax),alpha_l(i,nmax));
-  #       }
-  #     }
-  #     results[0]=power;
-  #     results[1]=n;
-  #   }
+  get_power_and_n <- function(nmax, smax, p, powername) {
+    # void get_power_and_n(int nmax, int smax, double p, double *results, int printall, FILE* output)
+    # /* calls get_prob with p to get power for boundary obtained previously */
+    
+    # initialise variables
+    probsi = NA
+    power=0
+    n=0
+    pcross_low=0
+    pcross_low2=1
+    pcross_low_old <- pcross_low2_old <- NA
+    
+    initProbs(smax);
+    
+    for(i in 1:nmax) {
+      updateProb(smax)
+      pcross_low_old=pcross_low
+      pcross_low2_old=pcross_low2
+      
+      # handle i-1 for i=1
+      if(i==1) 
+        lowerimin1 <- lowerbound0
+      else lowerimin1 <- lowerbound[i-1]
+      
+      
+      for(si in lowerimin1: upperbound[i]){
+        if(si>=0)
+        {
+          getProb(i, si, p);
+          if(si==0) probsi <- prob0
+          else probsi <- prob[si]
+        }
+        else probsi <- 0
+        
+        if (si==lowerimin1) {
+          pcross_low2 <- pcross_low
+        }
+        pcross_low2 <- pcross_low2 + probsi
+        if (si<=lowerbound[i]) pcross_low <- pcross_low +probsi
+      }
+      
+      power <- power + (pcross_low2_old-pcross_low2)
+      n <- n+ (i*(pcross_low2_old-pcross_low2+pcross_low-pcross_low_old))
+      
+    }
+    
+    # return results
+    powervals[1, powername] <<- power
+    powervals[2, powername] <<- n
+    
+  }
   
   # alpha_l calculates the spending function for the lower bound
   # using functions from SpendingFunctions.R
