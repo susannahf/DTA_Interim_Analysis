@@ -42,30 +42,34 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
   main <- function(p0, p1, alpha, power, nmax, smax, spend = "Simple") {
     spendfunc <<- spend
     
-    
     # testing only
-    getBoundary(nmax, smax, "power1")
-    
+    #getBoundary(nmax, smax, "power1")
+    originalnmax <- nmax
     
     # call getBoundary() in a searching loop to find nmax such that nmax<NMAX+1 
     # and power is closest to specified power (but a bit less)
     # this is needed to get the defined power because the lower boundary is defined by (1-alpha) and not beta
     # need to determine what nmax actually is...
     # /* search starts looking every GINC and is refined to GINC/10  ... 1 */
-    #   for (g_inc=GINC; g_inc>=1; g_inc/=10)
-    #   {
-    #     if (g_inc==GINC) g_start=GSTART;
-    #     else g_start=(int)(nmax/GROUP)-19*g_inc;
-    #     power1[0]=0.;
-    #     for (nmax=g_start*GROUP; nmax<NMAX_PLUS_1 && power1[0]<POWER;
-    #          nmax+=g_inc*GROUP)
-    #     {
-    #       get_boundary(nmax, smax, power1, output);
-    #       printf("nmax=%i: power at p=%f = %f\n", nmax,P1,power1[0]);
-    #     }
-    #   }
+    GROUP = 100
+    GINC = 10
+    GSTART = 40
+    # g_seq counts from GINC to 1, dividing by 10 each time
+    g_seq <- 10^(seq(log10(GINC), 0, -1))
+    for(g_inc in g_seq)
+    {
+      if (g_inc==GINC) g_start=GSTART
+      else g_start=round((nmax/GROUP))-19*g_inc
+      powervals$power1[1]=0;
+      nmaxvals <- seq(g_start*GROUP, originalnmax, g_inc*GROUP) 
+      for(nmax in nmaxvals) {
+        if(powervals$power1[1] >= power) break
+        getBoundary(nmax, smax, "power1")
+        print(paste0("nmax=", nmax, "; power at p=", p1 ," is ",powervals$power1[1]))
+      }
+    }
     # 
-    # nmax-=GROUP;
+    nmax = nmax-GROUP
     # 
     
     get_power_and_n(nmax, smax, p0, "power0")
