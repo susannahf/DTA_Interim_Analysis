@@ -28,7 +28,7 @@ if(!inherits(test2, "try-error")) {
 
 DTAp0=0.6
 DTAp1=0.8
-npts =200
+npts =10000
 
 # Test 3: does the DTA code run?
 test3 <- try(DTAspendingboundaries(DTAp0,DTAp1, ndata=npts))

@@ -60,7 +60,7 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
     {
       if (g_inc==GINC) g_start=GSTART
       else g_start=round((nmax/GROUP))-19*g_inc
-      powervals$power1[1]=0;
+      powervals$power1[1]<<-0;
       print(paste("about to run seq(g_start*GROUP, originalnmax, g_inc*GROUP)", g_start, GROUP, originalnmax, g_inc))
       nmaxvals <- seq(g_start*GROUP, originalnmax, g_inc*GROUP) 
       for(nmax in nmaxvals) {
@@ -262,6 +262,9 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
     # void get_power_and_n(int nmax, int smax, double p, double *results, int printall, FILE* output)
     # /* calls get_prob with p to get power for boundary obtained previously */
     
+    # debugging
+    #print(paste("in get_power_and_n, p=", p, "powername=", powername))
+    
     # initialise variables
     probsi = NA
     power=0
@@ -304,9 +307,14 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
       
     }
     
+    # debugging
+    #print(paste0("power=", power, "n=", n, "powervals is:"))
+    
     # return results
     powervals[1, powername] <<- power
     powervals[2, powername] <<- n
+    
+    #print(powervals)
     
   }
   
