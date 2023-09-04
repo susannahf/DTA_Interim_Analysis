@@ -61,6 +61,7 @@ STbounds <- function(p0, p1, alpha, power, nmax, smax){
       if (g_inc==GINC) g_start=GSTART
       else g_start=round((nmax/GROUP))-19*g_inc
       powervals$power1[1]=0;
+      print(paste("about to run seq(g_start*GROUP, originalnmax, g_inc*GROUP)", g_start, GROUP, originalnmax, g_inc))
       nmaxvals <- seq(g_start*GROUP, originalnmax, g_inc*GROUP) 
       for(nmax in nmaxvals) {
         if(powervals$power1[1] >= power) break

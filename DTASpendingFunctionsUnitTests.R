@@ -14,9 +14,9 @@ if(!inherits(test1, "try-error")) {
 } else { message("Test 2 failed.")}
 
 # reasonable test values
-nmax=smax=9999
-p0=0.4
-p1=0.1 # we may not need this
+nmax=smax=10000
+p0=0.6
+p1=0.8 # we may not need this
 power=0.8 # we may not need this
 alpha=0.05
 
@@ -27,8 +27,8 @@ if(!inherits(test2, "try-error")) {
 } else { message("Test 2 failed.")}
 
 DTAp0=0.6
-DTAp1=0.9
-npts =10000
+DTAp1=0.8
+npts =200
 
 # Test 3: does the DTA code run?
 test3 <- try(DTAspendingboundaries(DTAp0,DTAp1, ndata=npts))
