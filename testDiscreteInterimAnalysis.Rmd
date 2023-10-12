@@ -436,7 +436,7 @@ The variables we can set are:
 * *p1* - the proportion defining H1: p >= p1 
 * p0 and p1 are separately defined for sensitivity and specificity
 
-```{r spendingfuncsetup}
+```{r spendingfuncsetup, eval=FALSE}
 source("DTAspendingFunctions.R")
 
 # test values that compare to above method
