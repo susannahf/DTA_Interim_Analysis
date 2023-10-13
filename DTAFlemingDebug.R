@@ -1,94 +1,86 @@
-# Trying to debug DTAInterimAnalysis
-source("generateDTAdata.R") # for continuousSeSp()
-source("DTAinterimAnalysis.R") # for DTAdiscreteInterimAnalysis
+# something strange is happening, where sensitivity in particular is terminating with the "wrong" conclusion.
 
-# let's try one of the sample data sets
+# but it seems to work on the test data in teh RMD file
+
+# plan: 
+# replicate the test data @ 200 points results which seem to be correct
+# try running the test data @ 100 points
+
+source("DTAinterimAnalysis.R")
+source("generateDTAdata.R")
+
+# load test data
 testdata1 <- readRDS("testData1.rds")
+testdata2 <- readRDS("testData2.rds")
 
-# continuousSeSp adds TP and TN columns, which are needed for interim analysis code and shortens to 100pts
-testdata1 <- continuousSeSp(testdata[1:100,])
+# set up short test data
+testshort1 <- testdata1[1:200,]
+testshort2 <- testdata2[1:200,]
+# these should nominally have Se= 65 and Sp = 85 but won't 
 
-# run interim analyses at n=20, 50, and 100
-# and cutoffs of 0.6 for both Se and Sp
-# the minimal set of columns for this code are "reference", "TP", and "TN"
-test1 <- DTAdiscreteInterimAnalysis(testwithTPTN,c(20,50,100), pSe=0.6, pSp=0.6, simpleOutput = TRUE)
-print(test1)
+# calculate continuous Se and Sp
+contshort1 <- continuousSeSp(testshort1)
+contshort2 <- continuousSeSp(testshort2)
+contshorter1 <- contshort1[1:100, ]
+contshorter2 <- contshort2[1:100, ]
 
-test2 <- DTAdiscreteInterimAnalysis(testwithTPTN,1:100, pSe=0.6, pSp=0.6, simpleOutput = TRUE)
-print(test2)
+# find the theoretical Fleming thresholds for these
+sep0_60 <- modelFlemingTerminationThresholds(0.4, n=200)
+spp0_90 <- modelFlemingTerminationThresholds(0.1, n=200)
+sep0_60short <- modelFlemingTerminationThresholds(0.4, n=100)
+spp0_90short <- modelFlemingTerminationThresholds(0.1, n=100)
 
+# plot data against thresholds
+x <- 1:nrow(contshort1)
+xs <- 1:nrow(contshorter1)
 
-# debugging
-termthresh <- modelFlemingTerminationThresholds(0.4, n=100)
-
-#Se
-plot(x,testdata1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se", ylab="Sensitivity")
-lines(x, termthresh$invH0limit, col="red", 'l', lty="dashed")
-lines(x, termthresh$invH1limit, col="red", 'l', lty="dotdash")
-lines(x, rep(0.6,100), col="red")
+# plot continuous Se and Sp for contshort1
+#Se 200
+plot(x,contshort1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 1, n=200, p0=0.6", ylab="Sensitivity")
+lines(x, sep0_60$invH0limit, col="red", 'l', lty="dashed")
+lines(x, sep0_60$invH1limit, col="red", 'l', lty="dotdash")
+lines(x, rep(0.6,200), col="red")
 grid()
-#legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
-#Sp
-plot(x,testdata1$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp", ylab="Specificity")
-lines(x, termthresh$invH0limit, col="blue", 'l', lty="dashed")
-lines(x, termthresh$invH1limit, col="blue", 'l', lty="dotdash")
-lines(x, rep(0.6,100), col="blue")
+#Se 100
+plot(xs,contshorter1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 1, n=100, p0=0.6", ylab="Sensitivity")
+lines(xs, sep0_60short$invH0limit, col="red", 'l', lty="dashed")
+lines(xs, sep0_60short$invH1limit, col="red", 'l', lty="dotdash")
+lines(xs, rep(0.6,100), col="red")
 grid()
-#legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # create a (not completely) random data set to practice on
-# set.seed(7)
-# testdata <- data.frame( 
-#   reference = as.logical(rbinom(100,1,0.2)),
-#   index = as.logical(rbinom(100,1,0.4))
-# )
-# 
-# # continuousSeSp adds TP and TN columns, which are needed for interim analysis code
-# testwithTPTN <- continuousSeSp(testdata)
-# 
-# # run interim analyses at n=20, 50, and 100
-# # and cutoffs of 0.6 for both Se and Sp
-# # the minimal set of columns for this code are "reference", "TP", and "TN"
-# test1 <- DTAdiscreteInterimAnalysis(testwithTPTN,c(20,50,100), pSe=0.6, pSp=0.6, simpleOutput = TRUE)
-# print(test1)
-# 
-# test2 <- DTAdiscreteInterimAnalysis(testwithTPTN,1:100, pSe=0.6, pSp=0.6, simpleOutput = TRUE)
-# print(test2)
-# 
-# 
-# # debugging
-# termthresh <- modelFlemingTerminationThresholds(0.4, n=100)
-# 
-# #Se
-# plot(x,testwithTPTN$Se,'l',col="red",ylim=c(0,1), main="Continuous Se", ylab="Sensitivity")
-# lines(x, termthresh$invH0limit, col="red", 'l', lty="dashed")
-# lines(x, termthresh$invH1limit, col="red", 'l', lty="dotdash")
-# lines(x, rep(0.6,100), col="red")
-# grid()
-# #legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
-# #Sp
-# plot(x,testwithTPTN$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp", ylab="Specificity")
-# lines(x, termthresh$invH0limit, col="blue", 'l', lty="dashed")
-# lines(x, termthresh$invH1limit, col="blue", 'l', lty="dotdash")
-# lines(x, rep(0.6,100), col="blue")
-# grid()
-# #legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
+#Sp 200
+plot(x,contshort1$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 1, n=200, p0=0.9", ylab="Specificity")
+lines(x, spp0_90$invH0limit, col="blue", 'l', lty="dashed")
+lines(x, spp0_90$invH1limit, col="blue", 'l', lty="dotdash")
+lines(x, rep(0.9,200), col="blue")
+grid()
+#Sp 100
+plot(xs,contshorter1$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 1, n=100, p0=0.9", ylab="Specificity")
+lines(xs, spp0_90short$invH0limit, col="blue", 'l', lty="dashed")
+lines(xs, spp0_90short$invH1limit, col="blue", 'l', lty="dotdash")
+lines(xs, rep(0.9,100), col="blue")
+grid()
+# plot continuous Se and Sp for contshort2
+#Se 200
+plot(x,contshort2$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 2, n=200, p0=0.6", ylab="Sensitivity")
+lines(x, sep0_60$invH0limit, col="red", 'l', lty="dashed")
+lines(x, sep0_60$invH1limit, col="red", 'l', lty="dotdash")
+lines(x, rep(0.6,200), col="red")
+grid()
+#Se 100
+plot(xs,contshorter2$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 2, n=100, p0=0.6", ylab="Sensitivity")
+lines(xs, sep0_60short$invH0limit, col="red", 'l', lty="dashed")
+lines(xs, sep0_60short$invH1limit, col="red", 'l', lty="dotdash")
+lines(xs, rep(0.6,100), col="red")
+grid()
+#Sp 200
+plot(x,contshort2$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 2, n=200, p0=0.9", ylab="Specificity")
+lines(x, spp0_90$invH0limit, col="blue", 'l', lty="dashed")
+lines(x, spp0_90$invH1limit, col="blue", 'l', lty="dotdash")
+lines(x, rep(0.9,200), col="blue")
+grid()
+#Sp 100
+plot(xs,contshorter2$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 2, n=100, p0=0.9", ylab="Specificity")
+lines(xs, spp0_90short$invH0limit, col="blue", 'l', lty="dashed")
+lines(xs, spp0_90short$invH1limit, col="blue", 'l', lty="dotdash")
+lines(xs, rep(0.9,100), col="blue")
+grid()
