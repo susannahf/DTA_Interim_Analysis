@@ -84,3 +84,26 @@ lines(xs, spp0_90short$invH0limit, col="blue", 'l', lty="dashed")
 lines(xs, spp0_90short$invH1limit, col="blue", 'l', lty="dotdash")
 lines(xs, rep(0.9,100), col="blue")
 grid()
+
+
+# now lets run continuous interim analysis to see if it terminates where and how we expect.
+pSe=0.6
+pSp=0.9
+testpoints <- 1:200
+test1 <- DTAdiscreteInterimAnalysis(contshort1,testpoints, pSe=pSe, pSp=pSp)
+test2 <- DTAdiscreteInterimAnalysis(contshort2,testpoints, pSe=pSe, pSp=pSp)
+testpoints <- 1:100
+test1short <- DTAdiscreteInterimAnalysis(contshorter1,testpoints, pSe=pSe, pSp=pSp)
+test2short <- DTAdiscreteInterimAnalysis(contshorter2,testpoints, pSe=pSe, pSp=pSp)
+
+# report results
+print("Test data 1, n=200:")
+print(test1)
+print("Test data 1, n=100:")
+print(test1short)
+print("Test data 2, n=200:")
+print(test2)
+print("Test data 2, n=100:")
+print(test2short)
+
+# this gives a few situations where it would appear actual stopping and predicted stopping do not match
