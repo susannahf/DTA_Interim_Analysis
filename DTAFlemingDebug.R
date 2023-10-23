@@ -109,7 +109,6 @@ print(test2short)
 # this gives a few situations where it would appear actual stopping and predicted stopping do not match
 
 #next plan
-# 2) check the stopping point code
 # 3) replicate the stopping using only the original Fleming code
 
 # 1) visualise the plots around the stopping points
@@ -172,5 +171,40 @@ lines(xs, rep(0.9,100), col="blue")
 grid(nx=2)
 
 # stopping points do not correspond with the theory. They are close for the n=200, but not **identical**
+
+# 2) check the stopping point code
+# check there is matching between modelFlemingTerminationThresholds and discreteInterimFleming
+modelterm <- modelFlemingTerminationThresholds(0.4, n=100)
+# need to test values for the same variable
+# in the model code:
+# termination lines are defined as Sk==rg or Sk==ag
+# so can we run the discrete code with Sk==rg or ag based on the termination code and see if they match?
+# create variables just above, below or at the thresholds for rg
+rgabove <- pmax(modelterm$rg+1, 0) # pmax returns the maximum of rg+1 or 0 at each point to ensure no negative rg
+rgeq <- pmax(modelterm$rg, 0)
+rgbelow <- pmax(modelterm$rg-1, 0)
+
+k=100
+nk = rep(1,100)
+# Ek are non-cumulated events at each point
+Ekrgeq <- c(rgeq[1], diff(rgeq))
+
+testrg <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=Ekrgeq)
+testrghi <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=c(rgabove[1], diff(rgabove)))
+testrglo <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=c(rgbelow[1], diff(rgbelow)))
+# these all give reasonable results
+
+# now test ag
+agabove <- pmax(modelterm$ag+1, 0) 
+ageq <- pmax(modelterm$ag, 0)
+agbelow <- pmax(modelterm$ag-1, 0)
+
+testag <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=c(ageq[1], diff(ageq)))
+testaghi <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=c(agabove[1], diff(agabove)))
+testaglo <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=c(agbelow[1], diff(agbelow)))
+# these also all give reasonable results
+
+
+
 
 
