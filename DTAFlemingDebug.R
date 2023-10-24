@@ -204,6 +204,15 @@ testaghi <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=c(agabov
 testaglo <- discreteInterimFleming(k=100, alpha=0.05, p0=0.4, nk=nk, Ek=c(agbelow[1], diff(agbelow)))
 # these also all give reasonable results
 
+# now check DTAinterimAnalysis
+# need to create a data set that replicates the above
+# rg* and ag* are numbers of events at each data point
+# AHA! N is different!
+# N for a simple binary outcome is the total N
+# but N for sensitivity or specificity is the N of the right portion subset (e.g. all true or all false)
+# this means we don't actually know the total N at the start.  Eep.
+# because N_Se = N_positiveRef and N_Sp = N_negativeRef
+# and at the moment, we're using N = N_Sp + N_Se, and N is used in the calculation of both rg and ag
 
 
 
