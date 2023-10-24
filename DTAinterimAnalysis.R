@@ -116,6 +116,78 @@ discreteInterimFleming <- function(k,
   
 }
 
+
+# run Fleming discrete interim analysis for a single set of data (e.g. one or more interim analyses)
+# does not do the final adjustment of rg at k
+# ns are the numbers of data points at each interim analysis (cumulative)
+# events are the numbers of events at each interim analysis (cumulative)
+# ns and events can be a vector or scalar but must have same length
+# finaln is the planned final sample size
+# p0is the proportion such that H0: p <= p0
+# alpha is the one sided nominal type I error (default 0.05)
+singleDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05) 
+{
+  # check inputs
+  if(length(ns)!=length(events)) {stop("there should be an equal number of ns and events")}
+  if(max(ns)>finaln) {stop("finaln should not be smaller than an interim n")}
+  
+  if(length(nk)!=k) {stop("Every stage (k) specified should be assigned a corresponding sample size (nk)")}
+  if(length(Ek)> k) {stop("Number of endpoint events (E) exceeds number of stages (k)")}
+
+  ### Fleming's (1982) critical boundaries 
+  z.alpha <- qnorm(1-alpha)
+  Nk <- finaln
+  pa <- (sqrt(Nk*p0) + z.alpha*sqrt(1-p0))^2/(Nk + (z.alpha)^2)
+  
+  rg <- NULL
+  ag <- NULL
+  for(g in seq(length(ns)))
+  {
+    ### Fleming TR, Equation 5 (recall sum(ai*b)=b*sum(ai))
+    rg[g] <- round(p0*ns[g] + z.alpha*sqrt(Nk*p0*(1-p0)))+1 
+    ag[g] <- round(pa*ns[g] - z.alpha*sqrt(Nk*pa*(1-pa)))
+  }
+  
+  
+  ### Conclusion based on critical boundaries
+  Sk <- events
+  
+  terminationStage <- 0
+  Conclude <- NULL
+  for(g in seq(length(Sk)))
+  {
+      if(Sk[g] <= ag[g]){
+        Conclude[g] <- paste0("Stop sampling and accept H0:p<=", p0)
+        if(terminationStage==0) { terminationStage <- g}
+      }
+      if(Sk[g] >= rg[g]){
+        Conclude[g] <- paste0("Stop sampling and accept H1:p>=", p0)
+        if(terminationStage==0){terminationStage <- g}
+      }
+      if(Sk[g] > ag[g] & Sk[g] < rg[g]){
+        Conclude[g] <- paste0("Continue to stage ", g+1)}
+  }
+  
+  ##### Output results
+  
+  output <- list("terminationStage"= terminationStage,
+                 "terminationType" =Conclude[terminationStage],
+                 "p" = p0,
+                 "details"=cbind.data.frame("Stage"=seq(length(Sk)),
+                                            "Cumulative_N"=ns,
+                                            "Cumulative_E"=events,
+                                            "Crit_ag"=ag,
+                                            "Crit_rg"=rg,
+                                            "Decision"=Conclude))
+  
+  return(output)
+  
+}
+
+
+
+
+
 # this applies Flemings method to DTA data
 # data: data in the form of the test datasets created by createTestData.R
 # analysispoints: vector of points at which (interim) analyses will be made
