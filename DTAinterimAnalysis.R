@@ -131,9 +131,6 @@ cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05)
   if(length(ns)!=length(events)) {stop("there should be an equal number of ns and events")}
   if(max(ns)>finaln) {stop("finaln should not be smaller than an interim n")}
   
-  if(length(nk)!=k) {stop("Every stage (k) specified should be assigned a corresponding sample size (nk)")}
-  if(length(Ek)> k) {stop("Number of endpoint events (E) exceeds number of stages (k)")}
-
   ### Fleming's (1982) critical boundaries 
   z.alpha <- qnorm(1-alpha)
   Nk <- finaln
