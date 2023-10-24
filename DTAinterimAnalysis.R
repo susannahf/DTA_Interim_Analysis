@@ -117,7 +117,7 @@ discreteInterimFleming <- function(k,
 }
 
 
-# run Fleming discrete interim analysis for a single set of data (e.g. one or more interim analyses)
+# run Fleming discrete interim analysis for one or more interim analyses and cumulative data
 # does not do the final adjustment of rg at k
 # ns are the numbers of data points at each interim analysis (cumulative)
 # events are the numbers of events at each interim analysis (cumulative)
@@ -125,7 +125,7 @@ discreteInterimFleming <- function(k,
 # finaln is the planned final sample size
 # p0is the proportion such that H0: p <= p0
 # alpha is the one sided nominal type I error (default 0.05)
-singleDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05) 
+cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05) 
 {
   # check inputs
   if(length(ns)!=length(events)) {stop("there should be an equal number of ns and events")}
