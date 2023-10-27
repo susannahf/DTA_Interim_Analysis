@@ -1,6 +1,7 @@
 # unit tests
 # not everything is unit tested, but any new code from 24 Oct 2023 should be.
 source("DTAinterimAnalysis.R")
+source("generateDTAdata.R")
 
 # unit tests for cumulDiscreteInterimFleming
 # create a few random data sets 
@@ -29,3 +30,40 @@ for(i in seq(10)) {
 }
 # if not stopped by here, test passed
 print("Test passed: discreteInterimFleming and cumulDiscreteInterimFleming agree")
+
+# unit tests for DTAdiscreteInterimAnalysis
+# compare DTAdiscreteInterimAnalysis with cumulDiscreteInterimFleming
+
+# run 10 times
+for(i in seq(10)) {
+  # create random data for Se and Sp with p of 0.8 and 0.6
+  p0Se <- 0.8
+  p0Sp <- 0.6
+  # prevalence = 0.2, N=100, so 20 Se data points and 80 Sp data points
+  prevalence <- 0.2
+  N <- 100
+  NSe <- prevalence*N
+  NSp <- N-NSe
+  TP <- rbinom(NSe,1,p0Se)
+  TN <- rbinom(NSp,1, p0Sp)
+  # pull out data for cumulDiscreteInterimFleming and run it
+  SeFleming <- cumulDiscreteInterimFleming(ns=seq(NSe), events=cumsum(1-TP), finaln=NSe, p0=1-p0Se, alpha=0.05)
+  SpFleming <- cumulDiscreteInterimFleming(ns=seq(NSp), events=cumsum(1-TN), finaln=NSp, p0=1-p0Sp, alpha=0.05)
+  
+  # pull out data for DTAdiscreteInterimAnalysis and run it
+  dtadata <- data.frame(reference=c(rep(TRUE, NSe), rep(FALSE, NSp)),
+                        index=c(as.logical(TP), !as.logical(TN)))
+  dtadata <- continuousSeSp(dtadata)
+  dtares <- DTAdiscreteInterimAnalysis(dtadata,seq(N), pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE)
+  # compare results
+  SeFlemingTest <- SeFleming$details
+  SpFlemingTest <- SpFleming$details
+  dtaSeTest <- dtares$Sensitivity$details
+  dtaSpTest <- dtares$Specificity$details
+  
+  if(any(SeFlemingTest!=dtaSeTest)) stop("Test failed: different results for Se from DTAdiscreteInterimAnalsysis and cumulDiscreteInterimFleming")
+  if(any(SpFlemingTest!=dtaSpTest)) stop("Test failed: different results for Sp from DTAdiscreteInterimAnalsysis and cumulDiscreteInterimFleming")
+}
+# if not stopped by here, test passed
+print("Test passed: DTAdiscreteInterimAnalysis and cumulDiscreteInterimFleming agree")
+  

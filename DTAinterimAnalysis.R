@@ -210,7 +210,7 @@ DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, 
     NSp <- N - NSe
   }
   
-   first create a counter variable so that I can cut on it
+  # first create a counter variable so that I can cut on it
   data$n <- 1:nrow(data)
   data$gp <- cut(data$n,c(0,analysispoints))
   # remove any rows with NAs (fall outside analysis)
