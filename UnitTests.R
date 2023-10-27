@@ -47,8 +47,12 @@ for(i in seq(10)) {
   TP <- rbinom(NSe,1,p0Se)
   TN <- rbinom(NSp,1, p0Sp)
   # pull out data for cumulDiscreteInterimFleming and run it
-  SeFleming <- cumulDiscreteInterimFleming(ns=seq(NSe), events=cumsum(1-TP), finaln=NSe, p0=1-p0Se, alpha=0.05)
-  SpFleming <- cumulDiscreteInterimFleming(ns=seq(NSp), events=cumsum(1-TN), finaln=NSp, p0=1-p0Sp, alpha=0.05)
+  SeNs <- c(seq(NSe), rep(NSe,NSp))
+  SpNs <- c(rep(0,NSe), seq(NSp))
+  SeEvents <- c(cumsum(1-TP), rep(sum(1-TP),NSp))
+  SpEvents <- c(rep(0,NSe), cumsum(1-TN))
+  SeFleming <- cumulDiscreteInterimFleming(ns=SeNs, events=SeEvents, finaln=NSe, p0=1-p0Se, alpha=0.05)
+  SpFleming <- cumulDiscreteInterimFleming(ns=SpNs, events=SpEvents, finaln=NSp, p0=1-p0Sp, alpha=0.05)
   
   # pull out data for DTAdiscreteInterimAnalysis and run it
   dtadata <- data.frame(reference=c(rep(TRUE, NSe), rep(FALSE, NSp)),

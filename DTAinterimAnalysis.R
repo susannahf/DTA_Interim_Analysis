@@ -222,18 +222,18 @@ DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, 
               nkSp=sum(reference==FALSE),
               EkSe=nkSe - sum(TP==TRUE),  
               EkSp=nkSp - sum(TN==TRUE))
-  k <- length(analysispoints) 
   # actually 1-Se and 1-Sp, so p0 needs to be 1-p
-  SeInterim <- discreteInterimFleming(k=k,
-                                       alpha=alpha,
-                                       p0=1-pSe,   
-                                       nk=interimvars$nkSe,
-                                       Ek=interimvars$EkSe)
-  SpInterim <- discreteInterimFleming(k=k,
-                                       alpha=alpha,
-                                       p0=1-pSp,
-                                       nk=interimvars$nkSp,
-                                       Ek=interimvars$EkSp)
+  SeInterim <- cumulDiscreteInterimFleming(ns=cumsum(interimvars$nkSe), 
+                                           events = cumsum(interimvars$EkSe),
+                                           finaln = NSe,
+                                           p0=1-pSe,   
+                                           alpha=alpha)
+  SpInterim <- cumulDiscreteInterimFleming(ns=cumsum(interimvars$nkSp), 
+                                           events = cumsum(interimvars$EkSp),
+                                           finaln = NSp,
+                                           p0=1-pSp,   
+                                           alpha=alpha)
+  
   res <- list("Sensitivity" = SeInterim, "Specificity"= SpInterim)
   
   if(simpleOutput){
