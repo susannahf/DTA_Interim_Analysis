@@ -190,11 +190,27 @@ cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05)
 # analysispoints: vector of points at which (interim) analyses will be made
 # pSe: threshold p0 for sensitivity data
 # pSp: threshold p0 for specificity data
+# prevalence: predicted / known prevalence for study
+# N / positiveN: planned / actual sample sizes.  N is total sample size. positiveN is sample size
+#   of positive cases.  One of these must be provided.  If both are provided, positiveN is used.
 # alpha: one sided nominal type I error (default 0.05)
 # simpleOutput: chooses between simplified (default), and detailed output
-DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp,alpha=0.05, simpleOutput=TRUE){
+DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, positiveN=NULL, N=NULL, alpha=0.05, simpleOutput=TRUE){
 
-  # first create a counter variable so that I can cut on it
+  # warn if both positiveN and N are provided
+  if(!is.null(positiveN) & !is.null(N)) {
+    warning("both N and positive N have been provided.  Using positive N only.")
+  }
+  # calculate NSe and NSp
+  if(!is.null(positiveN)){
+    NSe <- positiveN
+    NSp <- NSe/prevalence - NSe
+  } else {
+    NSe <- N * prevalence
+    NSp <- N - NSe
+  }
+  
+   first create a counter variable so that I can cut on it
   data$n <- 1:nrow(data)
   data$gp <- cut(data$n,c(0,analysispoints))
   # remove any rows with NAs (fall outside analysis)
