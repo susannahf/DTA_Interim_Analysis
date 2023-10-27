@@ -16,9 +16,10 @@ testwithTPTN <- continuousSeSp(testdata)
 # run interim analyses at n=20, 50, and 100
 # and cutoffs of 0.6 for both Se and Sp
 # the minimal set of columns for this code are "reference", "TP", and "TN"
-test1 <- DTAdiscreteInterimAnalysis(testwithTPTN,c(20,50,100), pSe=0.6, pSp=0.6, simpleOutput = TRUE)
+test1 <- DTAdiscreteInterimAnalysis(testwithTPTN,c(20,50,100), pSe=0.6, pSp=0.6, N=100, prevalence = 0.2, simpleOutput = FALSE)
 print(test1)
 
-
+test2 <- DTAdiscreteInterimAnalysis(testwithTPTN,1:100, pSe=0.6, pSp=0.6, N=100, prevalence = 0.2, simpleOutput = FALSE)
+print(test2)
 
 
