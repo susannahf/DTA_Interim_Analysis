@@ -247,8 +247,8 @@ DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, 
   res <- list("Sensitivity" = SeInterim, "Specificity"= SpInterim)
   
   if(simpleOutput){
-    ressimp <- list("Sensitivity" = simplifiedDiscreteInterimOutput(res$Sensitivity),
-        "Specificity" = simplifiedDiscreteInterimOutput(res$Specificity))
+    ressimp <- list("Sensitivity" = simplifiedDiscreteInterimOutput(res$Sensitivity, N),
+        "Specificity" = simplifiedDiscreteInterimOutput(res$Specificity, N))
     return(ressimp)
   }
   else{ return(res)
@@ -259,22 +259,34 @@ DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, 
 
 # helper function for DTAdiscreteInterimAnalysis() 
 ## interpret output of main interim analysis code into a data frame suitable for DTA
-simplifiedDiscreteInterimOutput <- function(detailedResults) {
+simplifiedDiscreteInterimOutput <- function(detailedResults, N) {
   termpoint <- detailedResults$terminationStage
   termtype <- detailedResults$terminationType
   p0 <- 1-detailedResults$p
-  endstop <- termpoint==length(detailedResults$details$Decision)
+  # termination happens? 
+  term <- termpoint>0
   futility <- length(grep("H1",termtype))>0 # true if H1 present
+  # no termination at study end
+  endstop = (!term & length(detailedResults$details$Decision)==N)
   
+  # if no termination, set termpoint and futility to NA
+  if(!term) {
+    termpoint=NA
+    futility=NA
+  }
+  
+  # set termstring
   termstring <- ""
-  if(endstop) { 
-    if(futility) termstring <- paste0(termstring, "Accept H1 p<=", p0, " at study end")
-    else termstring <- paste0(termstring, "Accept H0 p>=", p0, " at study end")
+  if(!term) { 
+    if(endstop) termstring <- paste0(termstring, "Reached study end without termination")
+    else termstring <- paste0(termstring, "No termination by final interim analysis")
   }
   else { termstring <- paste0(termstring, "Stop for ")
     if(futility) { termstring <- paste0(termstring, "futility with p<=", p0, " at k=", termpoint)}
     else { termstring <- paste0(termstring, "efficacy with p>=", p0 , " at k=", termpoint)}
   }
+  
+  
    
   res <- data.frame(terminateAt = termpoint,
                     futility = futility,
