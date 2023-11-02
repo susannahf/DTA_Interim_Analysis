@@ -108,6 +108,7 @@ interims <- DTAdiscreteInterimAnalysis(contshort,seq(25), pSe=0.85, pSp=0.9, pre
 })
 
 # low termination
+print("Testing termination for low Se/Sp")
 # check terminateAt matches
 if(lowterm$Sensitivity$terminationStage != lowterms$Sensitivity$terminateAt) 
   stop("Test failed: different termination stages in full and simple outputs")
@@ -117,15 +118,16 @@ if(lowterm$Specificity$terminationStage != lowterms$Specificity$terminateAt)
 if(lowterms$Sensitivity$futility!=FALSE) stop("Test failed: wrong futility in simple output")
 if(lowterms$Specificity$futility!=FALSE) stop("Test failed: wrong futility in simple output")
 # check string has correct number
-if(length(grep(lowterm$Sensitivity$terminationStage, lowterms$Sensitivity$termstring))>0)
+if(length(grep(lowterm$Sensitivity$terminationStage, lowterms$Sensitivity$termstring))==0)
   stop("Test failed: string has incorrect number")
-if(length(grep(lowterm$Specificity$terminationStage, lowterms$Specificity$termstring))>0)
+if(length(grep(lowterm$Specificity$terminationStage, lowterms$Specificity$termstring))==0)
   stop("Test failed: string has incorrect number")
 # check string contains "efficacy"
-if(length(grep("efficacy", lowterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
-if(length(grep("efficacy", lowterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy", lowterms$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy", lowterms$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
 
 # high termination
+print("Testing termination for high Se/Sp")
 # check terminateAt matches
 if(highterm$Sensitivity$terminationStage != highterms$Sensitivity$terminateAt) 
   stop("Test failed: different termination stages in full and simple outputs")
@@ -135,15 +137,16 @@ if(highterm$Specificity$terminationStage != highterms$Specificity$terminateAt)
 if(highterms$Sensitivity$futility!=TRUE) stop("Test failed: wrong futility in simple output")
 if(highterms$Specificity$futility!=TRUE) stop("Test failed: wrong futility in simple output")
 # check string has correct number
-if(length(grep(highterm$Sensitivity$terminationStage, highterms$Sensitivity$termstring))>0)
+if(length(grep(highterm$Sensitivity$terminationStage, highterms$Sensitivity$termstring))==0)
   stop("Test failed: string has incorrect number")
-if(length(grep(highterm$Specificity$terminationStage, highterms$Specificity$termstring))>0)
+if(length(grep(highterm$Specificity$terminationStage, highterms$Specificity$termstring))==0)
   stop("Test failed: string has incorrect number")
 # check string contains "futility"
-if(length(grep("futility", highterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
-if(length(grep("futility", highterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("futility", highterms$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("futility", highterms$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
 
 # no termination
+print("Testing non termination")
 # check terminateAt = NA
 if(!is.na(noterms$Sensitivity$terminateAt))  stop("Test failed: termination in simple output is not NA")
 if(!is.na(noterms$Specificity$terminateAt))  stop("Test failed: termination in simple output is not NA")
@@ -151,13 +154,14 @@ if(!is.na(noterms$Specificity$terminateAt))  stop("Test failed: termination in s
 if(!is.na(noterms$Sensitivity$futility)) stop("Test failed: wrong futility in simple output")
 if(!is.na(noterms$Specificity$futility)) stop("Test failed: wrong futility in simple output")
 # check string does not contain futility or efficacy
-if(length(grep("efficacy|futility", noterms$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
-if(length(grep("efficacy|futility", noterms$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy|futility", noterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy|futility", noterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
 # check string contains Se or Sp
-if(length(grep("Se", noterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
-if(length(grep("Sp", noterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("Se", noterms$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("Sp", noterms$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
 
 # pure interim
+print("Testing pure interim analysis")
 # check terminateAt = NA
 if(!is.na(interims$Sensitivity$terminateAt))  stop("Test failed: termination in simple output is not NA")
 if(!is.na(interims$Specificity$terminateAt))  stop("Test failed: termination in simple output is not NA")
@@ -165,11 +169,11 @@ if(!is.na(interims$Specificity$terminateAt))  stop("Test failed: termination in 
 if(!is.na(interims$Sensitivity$futility)) stop("Test failed: wrong futility in simple output")
 if(!is.na(interims$Specificity$futility)) stop("Test failed: wrong futility in simple output")
 # check string does not contain futility, efficacy, Se or Sp
-if(length(grep("efficacy|futility|Se|Sp", interims$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
-if(length(grep("efficacy|futility|Se|Sp", interims$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy|futility|Se|Sp", interims$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy|futility|Se|Sp", interims$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
 # check string contains continue
-if(length(grep("continue", interims$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
-if(length(grep("continue", interims$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("continue", interims$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("continue", interims$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
 
 # if not stopped by here, test passed
 print("Test passed: simplifiedDiscreteInterimOutput gives expected outputs")
