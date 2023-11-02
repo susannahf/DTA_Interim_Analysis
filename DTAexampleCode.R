@@ -23,3 +23,6 @@ test2 <- DTAdiscreteInterimAnalysis(testwithTPTN,1:100, pSe=0.6, pSp=0.6, N=100,
 print(test2)
 
 
+
+
+

@@ -70,4 +70,107 @@ for(i in seq(10)) {
 }
 # if not stopped by here, test passed
 print("Test passed: DTAdiscreteInterimAnalysis and cumulDiscreteInterimFleming agree")
-  
+
+
+# unit tests for simplifiedDiscreteInterimOutput
+# check that the output matches what's expected
+# use known data
+# load test data
+testdata <- readRDS("testData1.rds")
+# these should nominally have Se= 65 and Sp = 85, prev=0.4 but won't 
+# calculate continuous Se and Sp
+N <- 100
+prev <- 0.4
+contshort <- continuousSeSp(testdata[1:N, ])
+
+#suppress warnings because of final prevalence
+suppressWarnings({
+# full outputs
+# early termination for high Se at k=37 and Sp at k=30
+lowterm <- DTAdiscreteInterimAnalysis(contshort,seq(N), pSe=0.55, pSp=0.7, prevalence = prev, N=N, simpleOutput = FALSE)
+# early termination for low Se at k=63  and Sp at k=32
+highterm <- DTAdiscreteInterimAnalysis(contshort,seq(N), pSe=0.8, pSp=0.95, prevalence = prev, N=N, simpleOutput = FALSE)
+# no termination by end point for either
+noterm <- DTAdiscreteInterimAnalysis(contshort,seq(25), pSe=0.85, pSp=0.9, prevalence = prev, N=25, simpleOutput = FALSE)
+# pure interim, no termination for either
+interim <- DTAdiscreteInterimAnalysis(contshort,seq(25), pSe=0.85, pSp=0.9, prevalence = prev, N=N, simpleOutput = FALSE)
+
+
+# simple outputs
+# early termination for low Se at k=37 and Sp at k=30 
+lowterms <- DTAdiscreteInterimAnalysis(contshort,seq(N), pSe=0.55, pSp=0.7, prevalence = prev, N=N, simpleOutput = TRUE)
+# early termination for high Se at k=63  and Sp at k=32
+highterms <- DTAdiscreteInterimAnalysis(contshort,seq(N), pSe=0.8, pSp=0.95, prevalence = prev, N=N, simpleOutput = TRUE)
+# no termination by end point for either
+noterms <- DTAdiscreteInterimAnalysis(contshort,seq(25), pSe=0.85, pSp=0.9, prevalence = prev, N=25, simpleOutput = TRUE)
+# pure interim, no termination for either
+interims <- DTAdiscreteInterimAnalysis(contshort,seq(25), pSe=0.85, pSp=0.9, prevalence = prev, N=N, simpleOutput = TRUE)
+})
+
+# low termination
+# check terminateAt matches
+if(lowterm$Sensitivity$terminationStage != lowterms$Sensitivity$terminateAt) 
+  stop("Test failed: different termination stages in full and simple outputs")
+if(lowterm$Specificity$terminationStage != lowterms$Specificity$terminateAt) 
+  stop("Test failed: different termination stages in full and simple outputs")
+# check futility == FALSE
+if(lowterms$Sensitivity$futility!=FALSE) stop("Test failed: wrong futility in simple output")
+if(lowterms$Specificity$futility!=FALSE) stop("Test failed: wrong futility in simple output")
+# check string has correct number
+if(length(grep(lowterm$Sensitivity$terminationStage, lowterms$Sensitivity$termstring))>0)
+  stop("Test failed: string has incorrect number")
+if(length(grep(lowterm$Specificity$terminationStage, lowterms$Specificity$termstring))>0)
+  stop("Test failed: string has incorrect number")
+# check string contains "efficacy"
+if(length(grep("efficacy", lowterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy", lowterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+
+# high termination
+# check terminateAt matches
+if(highterm$Sensitivity$terminationStage != highterms$Sensitivity$terminateAt) 
+  stop("Test failed: different termination stages in full and simple outputs")
+if(highterm$Specificity$terminationStage != highterms$Specificity$terminateAt) 
+  stop("Test failed: different termination stages in full and simple outputs")
+# check futility == TRUE
+if(highterms$Sensitivity$futility!=TRUE) stop("Test failed: wrong futility in simple output")
+if(highterms$Specificity$futility!=TRUE) stop("Test failed: wrong futility in simple output")
+# check string has correct number
+if(length(grep(highterm$Sensitivity$terminationStage, highterms$Sensitivity$termstring))>0)
+  stop("Test failed: string has incorrect number")
+if(length(grep(highterm$Specificity$terminationStage, highterms$Specificity$termstring))>0)
+  stop("Test failed: string has incorrect number")
+# check string contains "futility"
+if(length(grep("futility", highterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("futility", highterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+
+# no termination
+# check terminateAt = NA
+if(!is.na(noterms$Sensitivity$terminateAt))  stop("Test failed: termination in simple output is not NA")
+if(!is.na(noterms$Specificity$terminateAt))  stop("Test failed: termination in simple output is not NA")
+# check futility = NA
+if(!is.na(noterms$Sensitivity$futility)) stop("Test failed: wrong futility in simple output")
+if(!is.na(noterms$Specificity$futility)) stop("Test failed: wrong futility in simple output")
+# check string does not contain futility or efficacy
+if(length(grep("efficacy|futility", noterms$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy|futility", noterms$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+# check string contains Se or Sp
+if(length(grep("Se", noterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("Sp", noterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+
+# pure interim
+# check terminateAt = NA
+if(!is.na(interims$Sensitivity$terminateAt))  stop("Test failed: termination in simple output is not NA")
+if(!is.na(interims$Specificity$terminateAt))  stop("Test failed: termination in simple output is not NA")
+# check futility = NA
+if(!is.na(interims$Sensitivity$futility)) stop("Test failed: wrong futility in simple output")
+if(!is.na(interims$Specificity$futility)) stop("Test failed: wrong futility in simple output")
+# check string does not contain futility, efficacy, Se or Sp
+if(length(grep("efficacy|futility|Se|Sp", interims$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("efficacy|futility|Se|Sp", interims$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect")
+# check string contains continue
+if(length(grep("continue", interims$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+if(length(grep("continue", interims$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect")
+
+# if not stopped by here, test passed
+print("Test passed: simplifiedDiscreteInterimOutput gives expected outputs")
+
