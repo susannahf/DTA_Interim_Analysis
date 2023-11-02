@@ -178,3 +178,46 @@ if(length(grep("interim", interims$Specificity$termstring))==0) stop("Test faile
 # if not stopped by here, test passed
 print("Test passed: simplifiedDiscreteInterimOutput gives expected outputs")
 
+
+# check that DTAdiscreteInterimAnalysis and DTAcumulativeInterimAnalysis give the same results
+# run 10 times
+for(i in seq(10)) {
+  # create random data for Se and Sp with p of 0.8 and 0.6
+  p0Se <- 0.65
+  p0Sp <- 0.85
+  prevalence <- 0.35
+  N <- 200
+  analysispoints <- seq(from=10, to=N, by=10)
+  
+  # create data
+  tbt <- create2x2(n=10*N, p=prevalence, se=p0Se, sp=p0Sp, digits=4, verbose=FALSE)
+  dtadata <- DTAdataFrom2x2(tbt, randomise = T)
+  dtadata <- continuousSeSp(dtadata[1:N, ])
+  
+  # run on interim analysis
+  dtares <- DTAdiscreteInterimAnalysis(dtadata, analysispoints, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE)
+  
+  # pull out data for DTAcumulativeInterimAnalysis
+  # want a data frame with the following:
+  # N, RefT, TP, TN
+  cumframe <- data.frame(N=numeric(),
+                         RefT=numeric(), 
+                         TP=numeric(),
+                         TN=numeric())
+  for(i in seq(length(analysispoints))) {
+    k <- analysispoints[i]
+    ifrm <- data.frame(N = k, 
+                       RefT = sum(dtadata$reference[1:k]), 
+                       TP = sum(dtadata$TP[1:k]),
+                       TN = sum(dtadata$TN[1:k]))
+    cumframe <- rbind(cumframe,ifrm)
+  }
+  
+  # run on cumulative analysis
+  cumres <- DTAcumulativeInterimAnalysis(cumframe, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE)
+  
+  # compare results
+  if(any(dtares!=cumres)) stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
+}
+# if not stopped by here, test passed
+print("Test passed: DTAdiscreteInterimAnalysis and DTAcumulativeInterimAnalysis agree")
