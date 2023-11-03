@@ -344,8 +344,67 @@ modelFlemingTerminationThresholds <- function(p0, n=200, alpha=0.05) {
   return(res)
 }
   
-
-
+# run DTA interim analysis using only cumulative data
+# data should be of the form of a data frame with the following columns (each corresponding to the data up to an interim analysis)
+# - N number of data points
+# - RefT number of positive reference cases
+# - TP number of true positives
+# - TN number of true negatives
+DTAcumulativeInterimAnalysis <- function(data, pSe, pSp, prevalence, positiveN=NULL, N=NULL, alpha=0.05, simpleOutput = TRUE){
+  
+  # warn if both positiveN and N are provided
+  if(!is.null(positiveN) & !is.null(N)) {
+    warning("both N and positive N have been provided.  Using positive N only.")
+  }
+  
+  # calculate NSe and NSp
+  if(!is.null(positiveN)){
+    NSe <- positiveN
+    NSp <- NSe/prevalence - NSe
+  } else {
+    NSe <- N * prevalence
+    NSp <- N - NSe
+  }
+  # check that Ns don't need inflating
+  if(max(data$RefT) > NSe) {
+    NSe <- max(data$RefT)
+    warning("NSe inflated as more positives than expected")
+  }
+  if(max(data$N-data$RefT) > NSp) {
+    NSp <- max(data$N-data$RefT)
+    warning("NSp inflated as more negatives than expected")
+  }
+  
+    # create useful variables
+  # we actually are analysing on 1-Se and 1-Sp, so Ek are adjusted for this
+  nkSe <- data$RefT
+  nkSp <- data$N-data$RefT
+  EkSe <- nkSe - data$TP
+  EkSp <- nkSp - data$TN
+  
+  # actually 1-Se and 1-Sp, so p0 needs to be 1-p
+  SeInterim <- cumulDiscreteInterimFleming(ns=nkSe, 
+                                           events = EkSe,
+                                           finaln = NSe,
+                                           p0=1-pSe,   
+                                           alpha=alpha)
+  SpInterim <- cumulDiscreteInterimFleming(ns=nkSp, 
+                                           events = EkSp,
+                                           finaln = NSp,
+                                           p0=1-pSp,   
+                                           alpha=alpha)
+  
+  res <- list("Sensitivity" = SeInterim, "Specificity"= SpInterim)
+  
+  if(simpleOutput){
+    ressimp <- list("Sensitivity" = simplifiedDiscreteInterimOutput(res$Sensitivity, N),
+                    "Specificity" = simplifiedDiscreteInterimOutput(res$Specificity, N))
+    return(ressimp)
+  }
+  else{ return(res)
+  }
+  
+}
 
 
 

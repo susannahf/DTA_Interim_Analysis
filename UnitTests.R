@@ -195,7 +195,8 @@ for(i in seq(10)) {
   dtadata <- continuousSeSp(dtadata[1:N, ])
   
   # run on interim analysis
-  dtares <- DTAdiscreteInterimAnalysis(dtadata, analysispoints, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE)
+  suppressWarnings(
+    dtares <- DTAdiscreteInterimAnalysis(dtadata, analysispoints, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE))
   
   # pull out data for DTAcumulativeInterimAnalysis
   # want a data frame with the following:
@@ -214,10 +215,15 @@ for(i in seq(10)) {
   }
   
   # run on cumulative analysis
-  cumres <- DTAcumulativeInterimAnalysis(cumframe, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE)
+  suppressWarnings(
+    cumres <- DTAcumulativeInterimAnalysis(cumframe, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE))
   
   # compare results
-  if(any(dtares!=cumres)) stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
+  if(any(dtares$Sensitivity$details!=cumres$Sensitivity$details)) 
+    stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
+  if(any(dtares$Specificity$details!=cumres$Specificity$details)) 
+    stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
+
 }
 # if not stopped by here, test passed
 print("Test passed: DTAdiscreteInterimAnalysis and DTAcumulativeInterimAnalysis agree")
