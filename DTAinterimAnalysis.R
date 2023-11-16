@@ -194,6 +194,7 @@ cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05)
 
 # this applies Flemings method to DTA data
 # data: data in the form of the test datasets created by createTestData.R
+# ie. a data frame with binary reference, TP and TN values
 # analysispoints: vector of points at which (interim) analyses will be made
 # pSe: threshold p0 for sensitivity data
 # pSp: threshold p0 for specificity data
@@ -204,6 +205,16 @@ cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05)
 # simpleOutput: chooses between simplified (default), and detailed output
 DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, positiveN=NULL, N=NULL, alpha=0.05, simpleOutput=TRUE){
 
+  # sanity checking
+  if (!is.data.frame(data)) {stop("DTAdiscreteInterimAnalysis: data should be a data frame")}
+  needdatacols <- c("reference", "TP", "TN")
+  if (!all(needdatacols %in% colnames(data))) {stop("DTAdiscreteInterimAnalysis: data should have reference TP and TN columns")}
+  if (!is.logical(data$reference) | !is.logical(data$TP) | !is.logical(data$TN))
+    {stop("DTAdiscreteInterimAnalysis: data should have binary reference TP and TN columns")}
+  if(pSe <= 0 | pSe >=1 | pSp <= 0 | pSp >=1) {stop("DTAdiscreteInterimAnalysis: p0 thresholds must be between 0 and 1")}
+  if(prevalence <= 0 | prevalence >=1) {stop("DTAdiscreteInterimAnalysis: prevalence must be between 0 and 1")}
+  if(alpha <= 0 | alpha >=1) {stop("DTAdiscreteInterimAnalysis: alpha must be between 0 and 1")}
+  
   # warn if both positiveN and N are provided
   if(!is.null(positiveN) & !is.null(N)) {
     warning("both N and positive N have been provided.  Using positive N only.")
@@ -316,6 +327,7 @@ simplifiedDiscreteInterimOutput <- function(detailedResults, N) {
 # p0 is proportion to be tested
 # n is number of points (default 200)
 modelFlemingTerminationThresholds <- function(p0, n=200, alpha=0.05) {
+  
   # set up variables
   nk = rep(1,n) # vector of additional n up to N=n
   rg <- ag <- H0lim <- H1lim <- NULL
@@ -358,6 +370,18 @@ modelFlemingTerminationThresholds <- function(p0, n=200, alpha=0.05) {
 # - TP number of true positives
 # - TN number of true negatives
 DTAcumulativeInterimAnalysis <- function(data, pSe, pSp, prevalence, positiveN=NULL, N=NULL, alpha=0.05, simpleOutput = TRUE){
+  
+  # sanity checking
+  if (!is.data.frame(data)) {stop("DTAcumulativeInterimAnalysis: data should be a data frame")}
+  needdatacols <- c("N", "RefT", "TP", "TN")
+  if (!all(needdatacols %in% colnames(data))) {stop("DTAcumulativeInterimAnalysis: data should have N RefT TP and TN columns")}
+  if (!is.numeric(data$N) | !is.numeric(data$RefT) | !is.numeric(data$TP) | !is.numeric(data$TN))
+  {stop("DTAcumulativeInterimAnalysis: data should have numeric N RefT TP and TN columns")}
+  if(pSe <= 0 | pSe >=1 | pSp <= 0 | pSp >=1) {stop("DTAcumulativeInterimAnalysis: p0 thresholds must be between 0 and 1")}
+  if(prevalence <= 0 | prevalence >=1) {stop("DTAcumulativeInterimAnalysis: prevalence must be between 0 and 1")}
+  if(alpha <= 0 | alpha >=1) {stop("DTAcumulativeInterimAnalysis: alpha must be between 0 and 1")}
+  if(any(data$RefT>data$N) | any(data$TP>data$N) | any(data$TN>data$N)) 
+    {stop("DTAcumulativeInterimAnalysis: RefT TP and TN must be less than N at each analysis point")}
   
   # warn if both positiveN and N are provided
   if(!is.null(positiveN) & !is.null(N)) {
