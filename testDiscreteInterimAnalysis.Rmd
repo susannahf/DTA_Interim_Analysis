@@ -1,7 +1,7 @@
 ---
 title: "Test Discrete Interim Analysis"
 author: "Susannah Fleming"
-date: "2022-10-11"
+date: "2023-11-16"
 output: word_document
 editor_options: 
   chunk_output_type: console
@@ -39,7 +39,7 @@ contshort2 <- continuousSeSp(testshort2)
 
 # Testing Interim analysis code
 
-We have two short data sets (set 1 and set 2), both of which are n=200 from a larger data set of n=1000, and both of which have nominal Se of 65% and Sp of 85%  (exact values will be slightly different from this.)
+We have two short data sets (set 1 and set 2), both of which are n=200 from a larger data set of n=1000, and both of which have nominal Se of 65% and Sp of 85% and prevalence of 35% (exact values will be slightly different from this.)
 
 The variables we can set are:
 
@@ -110,6 +110,9 @@ Note that the Fleming method requires that the underlying analysis is being run 
 
 ```{r testp0}
 
+prevalence = 0.35
+N = 200
+
 # test changing p0 on Se
 p0Se <- seq(0.5,0.9,0.1)
 # test changing p1 on Sp
@@ -122,8 +125,10 @@ op2ptests = data.frame()
 
 for(i in 1:5) {
   # run each test
-  test1 <- DTAdiscreteInterimAnalysis(contshort1,testpoints, pSe=p0Se[i], pSp=p0Sp[i])
-  test2 <- DTAdiscreteInterimAnalysis(contshort2,testpoints, pSe=p0Se[i], pSp=p0Sp[i])
+  suppressWarnings({
+    test1 <- DTAdiscreteInterimAnalysis(contshort1,testpoints, pSe=p0Se[i], pSp=p0Sp[i], prevalence = prevalence, N=N)
+    test2 <- DTAdiscreteInterimAnalysis(contshort2,testpoints, pSe=p0Se[i], pSp=p0Sp[i], prevalence = prevalence, N=N)
+  })
 
   # collect results
   res1ptests[[i]] <- test1
@@ -182,9 +187,11 @@ ktestdata2 = list()
 for(i in 1:length(kvals)) {
   # run each test
   testpoints <- genEvenlySpacedTests(kvals[i], 200)
-  test1 <- DTAdiscreteInterimAnalysis(contshort1,testpoints, pSe=pSe, pSp=pSp)
-  test2 <- DTAdiscreteInterimAnalysis(contshort2,testpoints, pSe=pSe, pSp=pSp)
-
+  suppressWarnings({
+    test1 <- DTAdiscreteInterimAnalysis(contshort1,testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N)
+    test2 <- DTAdiscreteInterimAnalysis(contshort2,testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N)
+  })
+  
   # collect results
   res1ktests[[i]] <- test1
   res2ktests[[i]] <- test2
@@ -254,6 +261,7 @@ The following graphs illustrate where the method terminates.
 
 ```{r whereterminate}
 # illustrate where the method terminates
+# TODO fix this
 
 # terminations thresholds for p0 of 0.4 and 0.1 (se of 0.6 and sp of 0.9)
 sep0_60 <- modelFlemingTerminationThresholds(0.4, n=200)
@@ -413,73 +421,6 @@ threshplot <- ggplot(data=alldata, aes(x=x, y=thvalue, color=Measure, linetype=M
 print(threshplot)
 
 ggsave("thresholds.png",width=12,height=8)
-
-
-```
-
-# Spending function methodology
-
-Using the methodology of Stallard and Todd (2000), but with a simpler spending function from Kim/DeMets with \rho = 1.
-
-1) calculate upper and lower bounds and compare them with existing
-2) compare results with data in the Stallard/Todd paper
-3) add power and n calculation / fixes if necessary
-4) compare to above methodology on the example datasets
-
-
-## Compare performance with existing code
-
-The variables we can set are:
-
-* *alpha* - defaulting to 5% (alpha = 0.05)
-* *p0* - the proportion defining H0: p <= p0
-* *p1* - the proportion defining H1: p >= p1 
-* p0 and p1 are separately defined for sensitivity and specificity
-
-```{r spendingfuncsetup, eval=FALSE}
-source("DTAspendingFunctions.R")
-
-# test values that compare to above method
-nmax=smax=200-1
-p0=c(0.6, 0.9) 
-p1=  c(0.8, 0.95) # we may not need this
-power=0.8 # we may not need this
-alpha=0.05
-
-testse <- DTAspendingboundaries(p0[1],p1[1], alpha=alpha, power=power, ndata=nmax)
-testsp <- DTAspendingboundaries(p0[2],p1[2], alpha=alpha, power=power, ndata=nmax)
-
-# plot the boundaries against the data sets
-x <- 1:nrow(contshort1)
-
-# plot continuous Se and Sp for contshort1
-#Se
-plot(x,contshort1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 1, p0=0.6, p1=0.8", ylab="Sensitivity")
-lines(x, testse$upperbnd, col="red", 'l', lty="dashed")
-lines(x, testse$lowerbnd, col="red", 'l', lty="dotdash")
-lines(x, rep(0.6,200), col="red")
-legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
-#Sp
-plot(x,contshort1$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 1, p0=0.9. p1=0.95", ylab="Specificity")
-lines(x, testsp$upperbnd, col="blue", 'l', lty="dashed")
-lines(x, testsp$lowerbnd, col="blue", 'l', lty="dotdash")
-lines(x, rep(0.9,200), col="blue")
-legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
-
-# plot continuous Se and Sp for contshort2
-#Se
-plot(x,contshort2$Se,'l',col="red",ylim=c(0,1), main="Continuous Se, data set 2, p0=0.6, p1=0.8", ylab="Sensitivity")
-lines(x, testse$upperbnd, col="red", 'l', lty="dashed")
-lines(x, testse$lowerbnd, col="red", 'l', lty="dotdash")
-lines(x, rep(0.6,200), col="red")
-legend("bottomright", c("Sensitivity", "H0 limit", "H1limit", "p0"), col=c("red"),lty=c(1,2,4,1))
-#Sp
-plot(x,contshort2$Sp,'l',col="blue",ylim=c(0,1), main="Continuous Sp, data set 2, p0=0.9, p1=0.95", ylab="Specificity")
-lines(x, testsp$upperbnd, col="blue", 'l', lty="dashed")
-lines(x, testsp$lowerbnd, col="blue", 'l', lty="dotdash")
-lines(x, rep(0.9,200), col="blue")
-legend("bottomright", c("Specificity", "H0 limit", "H1limit", "p0"), col=c("blue"),lty=c(1,2,4,1))
-
 
 
 ```
