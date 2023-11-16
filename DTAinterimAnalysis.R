@@ -21,16 +21,18 @@ discreteInterimFleming <- function(k,
 {
   ### Prerequisites
 
-  
-  if(length(nk)!=k) {stop("Every stage (k) specified should be assigned a corresponding sample size (nk)")}
-  if(length(Ek)> k) {stop("Number of endpoint events (E) exceeds number of stages (k)")}
+  # sanity checking  
+  if(length(nk)!=k) {stop("discreteInterimFleming: Every stage (k) should be assigned a corresponding sample size (nk)")}
+  if(length(Ek)!=k) {stop("discreteInterimFleming: Every stage (k) should be assigned a corresponding number of events (Ek)")}
+  if(p0 <= 0 | p0 >=1) {stop("discreteInterimFleming: p0 must be between 0 and 1")}
+  if(any(Ek>nk)) {stop("discreteInterimFleming: there should not be more events than datapoints at any timepoint")}
   
   # Fleming TR, page 146 (last paragraph before Evaluation section)
   # commented out as there is no justification for k<5
   #if(k > 5) {stop(" The stages specified should be utmost 5")}
   
   # Validity of nominal type I/ II error 
-  if(alpha <= 0 | alpha >= 1 ) {stop("Nominal type I error rate must be between 0 and 1")}
+  if(alpha <= 0 | alpha >= 1 ) {stop("discreteInterimFleming: Nominal type I error rate must be between 0 and 1")}
 
 
   ### Fleming's (1982) critical boundaries 
@@ -129,8 +131,11 @@ discreteInterimFleming <- function(k,
 cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05) 
 {
   # check inputs
-  if(length(ns)!=length(events)) {stop("there should be an equal number of ns and events")}
-  if(max(ns)>finaln) {stop("finaln should not be smaller than an interim n")}
+  if(length(ns)!=length(events)) {stop("cumulDiscreteInterimFleming: there should be an equal number of ns and events")}
+  if(max(ns)>finaln) {stop("cumulDiscreteInterimFleming: finaln should not be smaller than an interim n")}
+  if(p0 <= 0 | p0 >=1) {stop("cumulDiscreteInterimFleming: p0 must be between 0 and 1")}
+  if(alpha <= 0 | alpha >= 1 ) {stop("cumulDiscreteInterimFleming: Nominal type I error rate must be between 0 and 1")}
+  if(any(events>ns)) {stop("cumulDiscreteInterimFleming: there should not be more events than datapoints at any timepoint")}
   
   ### Fleming's (1982) critical boundaries 
   z.alpha <- qnorm(1-alpha)
