@@ -65,8 +65,8 @@ for(i in seq(10)) {
   dtaSeTest <- dtares$Sensitivity$details
   dtaSpTest <- dtares$Specificity$details
   
-  if(any(SeFlemingTest!=dtaSeTest)) stop("Test failed: different results for Se from DTAdiscreteInterimAnalsysis and cumulDiscreteInterimFleming")
-  if(any(SpFlemingTest!=dtaSpTest)) stop("Test failed: different results for Sp from DTAdiscreteInterimAnalsysis and cumulDiscreteInterimFleming")
+  if(any(SeFlemingTest!=dtaSeTest, na.rm=T)) stop("Test failed: different results for Se from DTAdiscreteInterimAnalsysis and cumulDiscreteInterimFleming")
+  if(any(SpFlemingTest!=dtaSpTest, na.rm=T)) stop("Test failed: different results for Sp from DTAdiscreteInterimAnalsysis and cumulDiscreteInterimFleming")
 }
 # if not stopped by here, test passed
 print("Test passed: DTAdiscreteInterimAnalysis and cumulDiscreteInterimFleming agree")

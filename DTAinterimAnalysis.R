@@ -110,6 +110,7 @@ discreteInterimFleming <- function(k,
                                                           "Cumulative_E"=cumsum(Ek),
                                                           "Crit_ag"=ag,
                                                           "Crit_rg"=rg,
+                                                          "Estimated proportion"=cumsum(Ek)/cumsum(nk),
                                                           "Decision"=Conclude))
   
   return(output)
@@ -175,6 +176,7 @@ cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05)
                                             "Cumulative_E"=events,
                                             "Crit_ag"=ag,
                                             "Crit_rg"=rg,
+                                            "Estimated proportion"=events/ns,
                                             "Decision"=Conclude))
   
   return(output)
