@@ -438,6 +438,27 @@ DTAcumulativeInterimAnalysis <- function(data, pSe, pSp, prevalence, positiveN=N
 }
 
 
+# plot sensitivity and specificity against Fleming thresholds, allowing for which points contribute to each.
+# data should contain reference, Se and Sp columns
+# assumes that N is perfectly known for the data (i.e. this is the whole data and the planned sample size and prevalence)
+plotSeSpFlemingThresholds <- function(data, p0Se, p0Sp) {
+  
+  # sanity checking
+  if (!is.data.frame(data)) {stop("plotSeSpFlemingThresholds: data should be a data frame")}
+  needdatacols <- c("reference", "Se", "Sp")
+  if (!all(needdatacols %in% colnames(data))) {stop("plotSeSpFlemingThresholds: data should have reference Se and Sp columns")}
+  if (!is.logical(data$reference) | !is.numeric(data$Se) | !is.numeric(data$Se))
+  {stop("plotSeSpFlemingThresholds: data should have logical reference and numeric Se and Sp columns")}
+  if(pSe <= 0 | pSe >=1 | pSp <= 0 | pSp >=1) {stop("plotSeSpFlemingThresholds: p0 thresholds must be between 0 and 1")}
+  
+  # calculate Ns and Fleming thresholds
+  
+  
+  # plot 
+  
+  
+  
+}
 
 
 
