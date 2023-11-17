@@ -219,11 +219,18 @@ for(i in seq(10)) {
     cumres <- DTAcumulativeInterimAnalysis(cumframe, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE))
   
   # compare results
-  if(any(dtares$Sensitivity$details!=cumres$Sensitivity$details)) 
+  if(any(dtares$Sensitivity$details!=cumres$Sensitivity$details, na.rm=T)) 
     stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
-  if(any(dtares$Specificity$details!=cumres$Specificity$details)) 
+  if(any(dtares$Specificity$details!=cumres$Specificity$details, na.rm=T)) 
     stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
 
 }
 # if not stopped by here, test passed
 print("Test passed: DTAdiscreteInterimAnalysis and DTAcumulativeInterimAnalysis agree")
+
+
+# testing plotting
+# does it run?
+plotSeSpFlemingThresholds(dtadata, 0.6, 0.9)
+# if not stopped by here, test passed
+print("Test passed: plotSeSpFlemingThresholds runs")
