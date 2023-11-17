@@ -354,25 +354,69 @@ ggsave("datasets.png",width=12,height=5)
 
 
 ### graphs of continuous thresholds
+p0Se <- 0.6
+p0Sp <- 0.9
 
-# need to add data from sep0_60 and spp0_90 to example data
-sep0_60$x <- spp0_90$x <- 1:nrow(sep0_60)  
-sep0_60$Sesp <- "Sensitivity"
-sep0_60$p0 <- 0.6
-spp0_90$Sesp <- "Specificity"
-spp0_90$p0 <- 0.9
+# do some of the manual data creation
+dataSe1 <- contshort1[contshort1$reference==T, ]
+NSe1 <- nrow(dataSe1)
+Sethresh1 <- modelFlemingTerminationThresholds(1-p0Se, n=NSe1)
 
-dat60 <- sep0_60 %>% gather("Measure", "thvalue", invH0limit, invH1limit, p0)
-dat90 <- spp0_90 %>% gather("Measure", "thvalue", invH0limit, invH1limit, p0)
-threshboth <- merge(dat60, dat90, all=T)
+dataSe2 <- contshort2[contshort2$reference==T, ]
+NSe2 <- nrow(dataSe2)
+Sethresh2 <- modelFlemingTerminationThresholds(1-p0Se, n=NSe2)
+
+# specificity data, ref = F
+dataSp1 <- contshort1[contshort1$reference==F, ]
+NSp1 <- nrow(dataSp1)
+Spthresh1 <- modelFlemingTerminationThresholds(1-p0Sp, n=NSp1)
+dataSp2 <- contshort2[contshort2$reference==F, ]
+NSp2 <- nrow(dataSp2)
+Spthresh2 <- modelFlemingTerminationThresholds(1-p0Sp, n=NSp2)
+
+# add xs and identifying data
+Sethresh1$p0 <- Sethresh2$p0 <- p0Se
+Spthresh1$p0 <- Spthresh2$p0 <- p0Sp
+dataSe1$x <- Sethresh1$x <- 1:NSe1
+dataSe2$x <- Sethresh2$x <- 1:NSe2
+dataSp1$x <- Spthresh1$x <- 1:NSp1
+dataSp2$x <- Spthresh2$x <- 1:NSp2
+dataSe1$Sesp <- dataSe2$Sesp <- Sethresh1$Sesp <- Sethresh2$Sesp <- "Sensitivity"
+dataSp1$Sesp <- dataSp2$Sesp <- Spthresh1$Sesp <- Spthresh2$Sesp <- "Specificity"
+dataSe1$dataset <- dataSp1$dataset <- Sethresh1$dataset <- Spthresh1$dataset <- "Dataset 1"
+dataSe2$dataset <- dataSp2$dataset <- Sethresh2$dataset <- Spthresh2$dataset <- "Dataset 2"
+
+# gather and merge thresholds
+Sethresh1 <- Sethresh1 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
+Sethresh2 <- Sethresh2 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
+Spthresh1 <- Spthresh1 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
+Spthresh2 <- Spthresh2 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
+allthresh <- rbind(Sethresh1, Sethresh2, Spthresh1, Spthresh2)
+
 # improve labelling
-threshboth$Measure[threshboth$Measure=="invH0limit"] <- "accept H0"
-threshboth$Measure[threshboth$Measure=="invH1limit"] <- "reject H0"
+allthresh$Measure[allthresh$Measure=="invH0limit"] <- "efficacy"
+allthresh$Measure[allthresh$Measure=="invH1limit"] <- "futility"
+# remove unneeded data 
+allthresh <- allthresh %>% filter(Measure %in% c("efficacy", "futility", "p0"))
 
-alldata <- merge(threshboth, csboth, by=c("x", "Sesp"))
-legendlabels= c("data", "p0", "accept H0", "reject H0")
+# tidy and merge data
+dataSe1$Sespvalue <- dataSe1$Se
+dataSp1$Sespvalue <- dataSp1$Sp
+dataSe2$Sespvalue <- dataSe2$Se
+dataSp2$Sespvalue <- dataSp2$Sp
+keepcols <- c("x", "Sesp", "dataset", "Sespvalue")
+dataSe1 <- dataSe1[ , keepcols ]
+dataSp1 <- dataSp1[ , keepcols ]
+dataSe2 <- dataSe2[ , keepcols ]
+dataSp2 <- dataSp2[ , keepcols ]
+alldata <- rbind(dataSe1, dataSe2, dataSp1, dataSp2)
 
-threshplot <- ggplot(data=alldata, aes(x=x, y=thvalue, color=Measure, linetype=Measure)) + 
+plotdata <- merge(allthresh, alldata, by=c("x", "Sesp", "dataset"))
+
+
+legendlabels= c("data", "p0", "efficacy", "futility")
+
+threshplot <- ggplot(data=plotdata, aes(x=x, y=threshval, color=Measure, linetype=Measure)) + 
   geom_line(aes(y=Sespvalue, color="data", linetype="data")) +
   geom_line() +
   theme_bw() +
