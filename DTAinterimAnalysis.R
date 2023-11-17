@@ -455,17 +455,29 @@ plotSeSpFlemingThresholds <- function(data, p0Se, p0Sp) {
   # sensitivity data, ref = T
   dataSe <- data[data$reference==T, ]
   NSe <- nrow(dataSe)
-  Sethresh <- modelFlemingTerminationThresholds(p0Se, n=NSe)
+  Sethresh <- modelFlemingTerminationThresholds(1-p0Se, n=NSe)
+  xSe <- 1:NSe
   
   # specificity data, ref = F
   dataSp <- data[data$reference==F, ]
   NSp <- nrow(dataSp)
-  Spthresh <- modelFlemingTerminationThresholds(p0Sp, n=NSp)
-  
+  Spthresh <- modelFlemingTerminationThresholds(1-p0Sp, n=NSp)
+  xSp <- 1:NSp
   
   # plot 
-  
-  
+  # Se
+  plot(xSe,dataSe$Se,'l',col="red",ylim=c(0,1), main=paste0("Continuous Se, p0=", p0Se), ylab="Sensitivity", xlab="Cases")
+  lines(xSe, Sethresh$invH0limit, col="red", 'l', lty="dashed")
+  lines(xSe, Sethresh$invH1limit, col="red", 'l', lty="dotdash")
+  lines(xSe, rep(p0Se,NSe), col="red", 'l', lty="longdash")
+  legend("bottomright", c("Sensitivity", "Efficacy threshold", "Futility threshold", "p0"), col=c("red"),lty=c(1,2,4,5))
+  #Sp
+  plot(xSp,dataSp$Sp,'l',col="blue",ylim=c(0,1), main=paste0("Continuous Sp, p0=", p0Sp), ylab="Specificity", xlab="Non-cases")
+  lines(xSp, Spthresh$invH0limit, col="blue", 'l', lty="dashed")
+  lines(xSp, Spthresh$invH1limit, col="blue", 'l', lty="dotdash")
+  lines(xSp, rep(p0Sp,NSp), col="blue", 'l', lty="longdash")
+  legend("bottomright", c("Specificity", "Efficacy threshold", "Futility threshold", "p0"), col=c("blue"),lty=c(1,2,4,5))
+
   
 }
 
