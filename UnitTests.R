@@ -1,5 +1,9 @@
 # unit tests
 # not everything is unit tested, but any new code from 24 Oct 2023 should be.
+
+# clear environment first
+rm(list=ls())
+
 source("DTAinterimAnalysis.R")
 source("generateDTAdata.R")
 

@@ -449,7 +449,7 @@ plotSeSpFlemingThresholds <- function(data, p0Se, p0Sp) {
   if (!all(needdatacols %in% colnames(data))) {stop("plotSeSpFlemingThresholds: data should have reference Se and Sp columns")}
   if (!is.logical(data$reference) | !is.numeric(data$Se) | !is.numeric(data$Se))
   {stop("plotSeSpFlemingThresholds: data should have logical reference and numeric Se and Sp columns")}
-  if(pSe <= 0 | pSe >=1 | pSp <= 0 | pSp >=1) {stop("plotSeSpFlemingThresholds: p0 thresholds must be between 0 and 1")}
+  if(p0Se <= 0 | p0Se >=1 | p0Sp <= 0 | p0Sp >=1) {stop("plotSeSpFlemingThresholds: p0 thresholds must be between 0 and 1")}
   
   # separate data, calculate Ns and Fleming thresholds
   # sensitivity data, ref = T
