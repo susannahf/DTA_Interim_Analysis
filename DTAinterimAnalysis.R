@@ -28,8 +28,8 @@ discreteInterimFleming <- function(k,
   if(any(Ek>nk)) {stop("discreteInterimFleming: there should not be more events than datapoints at any timepoint")}
   
   # Fleming TR, page 146 (last paragraph before Evaluation section)
-  # commented out as there is no justification for k<5
-  #if(k > 5) {stop(" The stages specified should be utmost 5")}
+  # justified by OBrian and Fleming
+  if(k > 5) {stop("discreteInterimFleming: There should not be more than 5 interim analyses")}
   
   # Validity of nominal type I/ II error 
   if(alpha <= 0 | alpha >= 1 ) {stop("discreteInterimFleming: Nominal type I error rate must be between 0 and 1")}
@@ -42,6 +42,7 @@ discreteInterimFleming <- function(k,
   Nk <- sum(nk)
   pa <- (sqrt(sum(nk)*p0) + z.alpha*sqrt(1-p0))^2/(sum(nk) + (z.alpha)^2)
   
+  # no adjustment at "end of study"
   rg <- NULL
   ag <- NULL
   for(g in seq(length(nk)))
@@ -49,17 +50,8 @@ discreteInterimFleming <- function(k,
     ### Fleming TR, Equation 5 (recall sum(ai*b)=b*sum(ai))
     rg[g] <- round(p0*sum(nk[seq(g)]) + z.alpha*sqrt(Nk*p0*(1-p0)))+1 
     
-    ###Fleming TR, Equation 6
-    ### up to k-1
-    if(g<k)
-    {
-      ag[g] <- round(pa*sum(nk[seq(g)]) - z.alpha*sqrt(Nk*pa*(1-pa)))
-    }
-    ### up to k
-    if(g==k)
-    {
-      ag[g] <- rg[g]-1
-    }
+    ag[g] <- round(pa*sum(nk[seq(g)]) - z.alpha*sqrt(Nk*pa*(1-pa)))
+    
   }
   
 
@@ -73,9 +65,6 @@ discreteInterimFleming <- function(k,
   for(g in seq(length(Sk)))
   {
     
-    ### up to k-1
-    if(g<k)
-    {
       ###
       if(Sk[g] <= ag[g]){
         Conclude[g] <- paste0("Stop sampling and accept H0:p<=", p0)
@@ -87,19 +76,8 @@ discreteInterimFleming <- function(k,
       }
       if(Sk[g] > ag[g] & Sk[g] < rg[g]){
         Conclude[g] <- paste0("Continue to stage ", g+1)}
-    }
-    ### up to k
-    if(g==k)
-    {
-      if(Sk[g] <= ag[g]){
-        Conclude[g] <- paste0("Accept H0:p<=", p0," at study end")
-        if(terminationStage==0){ terminationStage <- g}
-      }
-      if(Sk[g] >= rg[g]){
-        Conclude[g] <- paste0("Accept H1:p>=", p0, " at study end")
-        if(terminationStage==0){ terminationStage <- g}
-      }
-    }
+    
+   
   }
   
   ##### Output results
@@ -136,6 +114,10 @@ cumulDiscreteInterimFleming <- function(ns, events, finaln, p0, alpha=0.05)
   if(p0 <= 0 | p0 >=1) {stop("cumulDiscreteInterimFleming: p0 must be between 0 and 1")}
   if(alpha <= 0 | alpha >= 1 ) {stop("cumulDiscreteInterimFleming: Nominal type I error rate must be between 0 and 1")}
   if(any(events>ns)) {stop("cumulDiscreteInterimFleming: there should not be more events than datapoints at any timepoint")}
+  
+  # Fleming TR, page 146 (last paragraph before Evaluation section)
+  # justified by OBrian and Fleming
+  if(length(ns)>5) {stop("cumulDiscreteInterimFleming: There should not be more than 5 interim analyses")}
   
   ### Fleming's (1982) critical boundaries 
   z.alpha <- qnorm(1-alpha)
