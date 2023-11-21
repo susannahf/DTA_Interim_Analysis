@@ -349,7 +349,7 @@ csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) +
   facet_grid(dataset ~ .)
 print(csplot)
 
-ggsave("datasets.png",width=12,height=5)
+ggsave("datasets.png",width=12,height=8)
 
 
 ### graphs of continuous thresholds
