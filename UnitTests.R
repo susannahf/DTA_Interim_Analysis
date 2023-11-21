@@ -16,20 +16,23 @@ source("generateDTAdata.R")
 for(i in seq(10)) {
   # create random non-cumulative event data for n=100
   rdata <- rbinom(100,1,0.4)
-  # cumulative
-  cdata <- cumsum(rdata)
   totaln <- 100
-  testn <- seq(100)
-  noncumn <- rep(1,100)
-  k <- 100
+  k=5
   p0 <- 0.4
+  # k random interim analysis points
+  anaPoints <- c(sort(round(runif(k-1, 10, totaln-10))), totaln)
+  # cumulative
+  cdata <- cumsum(rdata)[anaPoints]
+  # non-cumulative
+  nk <- c(anaPoints[1], diff(anaPoints))
+  Ek <- c(cdata[1], diff(cdata))
   
-  discdata <- discreteInterimFleming(k=k, alpha=0.05, p0=p0, nk=noncumn, Ek=rdata)
-  cumdata <- cumulDiscreteInterimFleming(ns=testn, events=cdata, finaln=totaln, p0=p0, alpha=0.05)
+  discdata <- discreteInterimFleming(k=k, alpha=0.05, p0=p0, nk=nk, Ek=Ek)
+  cumdata <- cumulDiscreteInterimFleming(ns=anaPoints, events=cdata, finaln=totaln, p0=p0, alpha=0.05)
   
   # tests - these should be identical
-  disctst <- discdata$details[1:99, ]
-  cumtst <- cumdata$details[1:99, ]
+  disctst <- discdata$details
+  cumtst <- cumdata$details
   if(any(disctst!=cumtst)) stop("Test failed: different results from discreteInterimFleming and cumulDiscreteInterimFleming")
 }
 # if not stopped by here, test passed
