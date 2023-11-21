@@ -214,16 +214,20 @@ for(i in seq(10)) {
   p0Sp <- 0.85
   prevalence <- 0.35
   N <- 200
-  analysispoints <- seq(from=10, to=N, by=10)
+  k <- 5
+  analysispoints <- sort(sample(10:150, k))
+  
   
   # create data
   tbt <- create2x2(n=10*N, p=prevalence, se=p0Se, sp=p0Sp, digits=4, verbose=FALSE)
   dtadata <- DTAdataFrom2x2(tbt, randomise = T)
   dtadata <- continuousSeSp(dtadata[1:N, ])
   
+  actualprev <- sum(dtadata$reference)/N
+  
   # run on interim analysis
   suppressWarnings(
-    dtares <- DTAdiscreteInterimAnalysis(dtadata, analysispoints, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE))
+    dtares <- DTAdiscreteInterimAnalysis(dtadata, analysispoints, pSe=p0Se, pSp=p0Sp, prevalence = actualprev, N=N, simpleOutput = FALSE))
   
   # pull out data for DTAcumulativeInterimAnalysis
   # want a data frame with the following:
@@ -243,13 +247,13 @@ for(i in seq(10)) {
   
   # run on cumulative analysis
   suppressWarnings(
-    cumres <- DTAcumulativeInterimAnalysis(cumframe, pSe=p0Se, pSp=p0Sp, prevalence = prevalence, N=N, simpleOutput = FALSE))
+    cumres <- DTAcumulativeInterimAnalysis(cumframe, pSe=p0Se, pSp=p0Sp, prevalence = actualprev, N=N, simpleOutput = FALSE))
   
   # compare results
   if(any(dtares$Sensitivity$details!=cumres$Sensitivity$details, na.rm=T)) 
-    stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
+    stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis Se")
   if(any(dtares$Specificity$details!=cumres$Specificity$details, na.rm=T)) 
-    stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis")
+    stop("Test failed: different results from DTAdiscreteInterimAnalsysis and DTAcumulativeInterimAnalysis Sp")
 
 }
 # if not stopped by here, test passed
