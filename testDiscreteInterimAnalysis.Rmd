@@ -335,14 +335,18 @@ csboth <- merge(cs1,cs2, all=T)
 csboth$Sesp[csboth$Sesp=="Se"] <- "Sensitivity"
 csboth$Sesp[csboth$Sesp=="Sp"] <- "Specificity"
 
+# vertical lines showing analysis points at 20, 50, 100
+analysispoints <- c(20,50,100)
+
 csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) + 
   geom_line() +
+  geom_vline(xintercept = analysispoints, linetype="dashed") +
   theme_bw() +
   scale_colour_grey(name="Measure") +
   labs(x="Data point", y="Proportion") +
   theme(legend.position="right",
         text=element_text(size=16)) +
-  facet_grid(. ~ dataset)
+  facet_grid(dataset ~ .)
 print(csplot)
 
 ggsave("datasets.png",width=12,height=5)
