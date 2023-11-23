@@ -15,9 +15,38 @@ library(knitr)
 source("DTAinterimAnalysis.R")
 ```
 
+2 devices.  
+Assume planned interim analysis after 50, 100 and 150 positive results, although exact numbers differ because multiple data come in on one day.  
+Ignore end of study data (>150 positives)
+
+
+
 ```{r setupdata}
 
 # load RAPTOR data
 raptor <- read.csv("Z:\\Stats_Group_Projects\\Interim_analysis_DTA\\RAPTORdata.csv")
+
+# remove rows where there are more than 150 positives
+raptor <- raptor[raptor$n.positives<=150, ]
+
+```
+
+Planned sample size is npos=150
+
+Planned prevalence is 0.3 (30%)
+
+Desirable p0 is Se=0.97 and Sp=0.99
+Acceptable p0 is Se=0.8 and Sp=0.95
+
+```{r rundta}
+
+Nposplanned = 150
+prevplanned = 0.3
+p0 <- data.frame(type=c("desirable", "acceptable"),
+                 Se = c(0.97, 0.8), 
+                 Sp = c(0.99, 0.95))
+
+# run each analysis separately to properly show interim performance
+# run each device separately
 
 ```
