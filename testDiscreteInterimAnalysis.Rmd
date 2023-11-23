@@ -407,88 +407,41 @@ print(csplot)
 ggsave("datasets.png",width=12,height=8)
 
 
-### graphs of continuous thresholds
-p0Se <- 0.6
-p0Sp <- 0.9
+## graphs of thresholds
+cs1int <- data.frame(n=factor(testpoints),
+                     Se=contshort1$Se[testpoints],
+                     Sp=contshort1$Sp[testpoints],
+                     Seag=1-(stopcs1$Sensitivity$details$Crit_ag/stopcs1$Sensitivity$details$Cumulative_N),
+                     Serg=1-(stopcs1$Sensitivity$details$Crit_rg/stopcs1$Sensitivity$details$Cumulative_N),
+                     Spag=1-(stopcs1$Specificity$details$Crit_ag/stopcs1$Specificity$details$Cumulative_N),
+                     Sprg=1-(stopcs1$Specificity$details$Crit_rg/stopcs1$Specificity$details$Cumulative_N), 
+                     Sedecision=stopcs1$Sensitivity$details$Decision, 
+                     Spdecision=stopcs1$Specificity$details$Decision)
+p1 <- ggplot(data=cs1int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+  geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  labs(x="Sensitivity", y="Specificity", title="Dataset 1") 
+print(p1)
 
-# do some of the manual data creation
-dataSe1 <- contshort1[contshort1$reference==T, ]
-NSe1 <- nrow(dataSe1)
-Sethresh1 <- modelFlemingTerminationThresholds(1-p0Se, n=NSe1)
-
-dataSe2 <- contshort2[contshort2$reference==T, ]
-NSe2 <- nrow(dataSe2)
-Sethresh2 <- modelFlemingTerminationThresholds(1-p0Se, n=NSe2)
-
-# specificity data, ref = F
-dataSp1 <- contshort1[contshort1$reference==F, ]
-NSp1 <- nrow(dataSp1)
-Spthresh1 <- modelFlemingTerminationThresholds(1-p0Sp, n=NSp1)
-dataSp2 <- contshort2[contshort2$reference==F, ]
-NSp2 <- nrow(dataSp2)
-Spthresh2 <- modelFlemingTerminationThresholds(1-p0Sp, n=NSp2)
-
-# add xs and identifying data
-Sethresh1$p0 <- Sethresh2$p0 <- p0Se
-Spthresh1$p0 <- Spthresh2$p0 <- p0Sp
-dataSe1$x <- Sethresh1$x <- 1:NSe1
-dataSe2$x <- Sethresh2$x <- 1:NSe2
-dataSp1$x <- Spthresh1$x <- 1:NSp1
-dataSp2$x <- Spthresh2$x <- 1:NSp2
-dataSe1$Sesp <- dataSe2$Sesp <- Sethresh1$Sesp <- Sethresh2$Sesp <- "Sensitivity"
-dataSp1$Sesp <- dataSp2$Sesp <- Spthresh1$Sesp <- Spthresh2$Sesp <- "Specificity"
-dataSe1$dataset <- dataSp1$dataset <- Sethresh1$dataset <- Spthresh1$dataset <- "Dataset 1"
-dataSe2$dataset <- dataSp2$dataset <- Sethresh2$dataset <- Spthresh2$dataset <- "Dataset 2"
-
-# gather and merge thresholds
-Sethresh1 <- Sethresh1 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
-Sethresh2 <- Sethresh2 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
-Spthresh1 <- Spthresh1 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
-Spthresh2 <- Spthresh2 %>% pivot_longer(cols=rg:p0, names_to="Measure", values_to="threshval")
-allthresh <- rbind(Sethresh1, Sethresh2, Spthresh1, Spthresh2)
-
-# improve labelling
-allthresh$Measure[allthresh$Measure=="invH0limit"] <- "efficacy"
-allthresh$Measure[allthresh$Measure=="invH1limit"] <- "futility"
-# remove unneeded data 
-allthresh <- allthresh %>% filter(Measure %in% c("efficacy", "futility", "p0"))
-
-# tidy and merge data
-dataSe1$Sespvalue <- dataSe1$Se
-dataSp1$Sespvalue <- dataSp1$Sp
-dataSe2$Sespvalue <- dataSe2$Se
-dataSp2$Sespvalue <- dataSp2$Sp
-keepcols <- c("x", "Sesp", "dataset", "Sespvalue")
-dataSe1 <- dataSe1[ , keepcols ]
-dataSp1 <- dataSp1[ , keepcols ]
-dataSe2 <- dataSe2[ , keepcols ]
-dataSp2 <- dataSp2[ , keepcols ]
-alldata <- rbind(dataSe1, dataSe2, dataSp1, dataSp2)
-
-plotdata <- merge(allthresh, alldata, by=c("x", "Sesp", "dataset"))
+cs2int <- data.frame(n=factor(testpoints),
+                     Se=contshort2$Se[testpoints],
+                     Sp=contshort2$Sp[testpoints],
+                     Seag=1-(stopcs2$Sensitivity$details$Crit_ag/stopcs2$Sensitivity$details$Cumulative_N),
+                     Serg=1-(stopcs2$Sensitivity$details$Crit_rg/stopcs2$Sensitivity$details$Cumulative_N),
+                     Spag=1-(stopcs2$Specificity$details$Crit_ag/stopcs2$Specificity$details$Cumulative_N),
+                     Sprg=1-(stopcs2$Specificity$details$Crit_rg/stopcs2$Specificity$details$Cumulative_N), 
+                     Sedecision=stopcs2$Sensitivity$details$Decision, 
+                     Spdecision=stopcs2$Specificity$details$Decision)
+p2 <- ggplot(data=cs2int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+  geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  labs(x="Sensitivity", y="Specificity", title="Dataset 2") 
+print(p2)
 
 
-legendlabels= c("data", "p0", "efficacy", "futility")
 
-threshplot <- ggplot(data=plotdata, aes(x=x, y=threshval, color=Measure, linetype=Measure)) + 
-  geom_line(aes(y=Sespvalue, color="data", linetype="data")) +
-  geom_line() +
-  theme_bw() +
-  scale_color_manual(name="Measure",
-                     labels=legendlabels,
-                     breaks=legendlabels,
-                     values=c("grey70","black","black","black")) +
-  scale_linetype_manual(name="Measure",
-                        labels=legendlabels,
-                        breaks=legendlabels,
-                        values=c("solid", "solid", "longdash","dashed")) +
-  theme(legend.position="right",
-        text=element_text(size=16)) +
-  labs(x="Data point", y="Proportion") +
-  facet_grid(Sesp ~ dataset)
-print(threshplot)
-
-ggsave("thresholds.png",width=12,height=8)
 
 
 ```
