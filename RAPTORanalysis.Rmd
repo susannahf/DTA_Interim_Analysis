@@ -1,0 +1,23 @@
+---
+title: "RAPTOR analysis"
+author: "Susannah Fleming"
+date: "2023-11-23"
+output: word_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r sourcing}
+library(knitr)
+source("DTAinterimAnalysis.R")
+```
+
+```{r setupdata}
+
+# load RAPTOR data
+raptor <- read.csv("Z:\\Stats_Group_Projects\\Interim_analysis_DTA\\RAPTORdata.csv")
+
+```
