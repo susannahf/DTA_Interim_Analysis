@@ -209,15 +209,6 @@ DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, 
     NSe <- N * prevalence
     NSp <- N - NSe
   }
-  # check that Ns don't need inflating
-  if(sum(data$reference==TRUE) > NSe) {
-    NSe <- sum(data$reference==TRUE)
-    warning("NSe inflated as more positives than expected")
-  }
-  if(sum(data$reference==FALSE) > NSp) {
-    NSp <- sum(data$reference==FALSE)
-    warning("NSp inflated as more negatives than expected")
-  }
   
   # first create a counter variable so that I can cut on it
   data$n <- 1:nrow(data)
@@ -231,6 +222,17 @@ DTAdiscreteInterimAnalysis <- function(data,analysispoints,pSe,pSp, prevalence, 
               nkSp=sum(reference==FALSE),
               EkSe=nkSe - sum(TP==TRUE),  
               EkSp=nkSp - sum(TN==TRUE))
+  
+  # check that Ns don't need inflating
+  if(sum(interimvars$nkSe) > NSe) {
+    NSe <- sum(interimvars$nkSe)
+    warning("NSe inflated as more positives than expected. This will change results for all interim analyses.")
+  }
+  if(sum(interimvars$nkSp) > NSp) {
+    NSp <- sum(interimvars$nkSp)
+    warning("NSp inflated as more negatives than expected. This will change results for all interim analyses.")
+  }
+  
   
   # actually 1-Se and 1-Sp, so p0 needs to be 1-p
   SeInterim <- cumulDiscreteInterimFleming(ns=cumsum(interimvars$nkSe), 
@@ -381,11 +383,11 @@ DTAcumulativeInterimAnalysis <- function(data, pSe, pSp, prevalence, positiveN=N
   # check that Ns don't need inflating
   if(max(data$RefT) > NSe) {
     NSe <- max(data$RefT)
-    warning("NSe inflated as more positives than expected")
+    warning("NSe inflated as more positives than expected. This will change results for all interim analyses.")
   }
   if(max(data$N-data$RefT) > NSp) {
     NSp <- max(data$N-data$RefT)
-    warning("NSp inflated as more negatives than expected")
+    warning("NSp inflated as more negatives than expected. This will change results for all interim analyses.")
   }
   
     # create useful variables

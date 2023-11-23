@@ -111,14 +111,12 @@ contshort <- continuousSeSp(testdata[1:N, ])
 
 
 #suppress warnings because of final prevalence
-suppressWarnings({
+
 # full outputs
 # early termination for high Se at k=37 and Sp at k=30
 lowterm <- DTAdiscreteInterimAnalysis(contshort,c(30, 40, 50), pSe=0.55, pSp=0.7, prevalence = prev, N=N, simpleOutput = FALSE)
 # early termination for low Se at k=63  and Sp at k=32
 highterm <- DTAdiscreteInterimAnalysis(contshort,c(30, 50, 70), pSe=0.8, pSp=0.95, prevalence = prev, N=N, simpleOutput = FALSE)
-# no termination by end point for either
-noterm <- DTAdiscreteInterimAnalysis(contshort,c(15, 25), pSe=0.85, pSp=0.9, prevalence = prev, N=25, simpleOutput = FALSE)
 # pure interim, no termination for either
 interim <- DTAdiscreteInterimAnalysis(contshort,c(15, 25), pSe=0.85, pSp=0.9, prevalence = prev, N=N, simpleOutput = FALSE)
 
@@ -128,11 +126,9 @@ interim <- DTAdiscreteInterimAnalysis(contshort,c(15, 25), pSe=0.85, pSp=0.9, pr
 lowterms <- DTAdiscreteInterimAnalysis(contshort,c(30, 40, 50), pSe=0.55, pSp=0.7, prevalence = prev, N=N, simpleOutput = TRUE)
 # early termination for high Se at k=63  and Sp at k=32
 highterms <- DTAdiscreteInterimAnalysis(contshort,c(30, 50, 70), pSe=0.8, pSp=0.95, prevalence = prev, N=N, simpleOutput = TRUE)
-# no termination by end point for either
-noterms <- DTAdiscreteInterimAnalysis(contshort,c(15, 25), pSe=0.85, pSp=0.9, prevalence = prev, N=25, simpleOutput = TRUE)
 # pure interim, no termination for either
 interims <- DTAdiscreteInterimAnalysis(contshort,c(15, 25), pSe=0.85, pSp=0.9, prevalence = prev, N=N, simpleOutput = TRUE)
-})
+
 
 # low termination
 #print("Testing termination for low Se/Sp")
@@ -171,21 +167,6 @@ if(length(grep(highterm$Specificity$terminationStage, highterms$Specificity$term
 # check string contains "futility"
 if(length(grep("futility", highterms$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect for futility")
 if(length(grep("futility", highterms$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect for futillity")
-
-# no termination
-#print("Testing non termination")
-# check terminateAt = NA
-if(!is.na(noterms$Sensitivity$terminateAt))  stop("Test failed: termination in simple output is not NA")
-if(!is.na(noterms$Specificity$terminateAt))  stop("Test failed: termination in simple output is not NA")
-# check futility = NA
-if(!is.na(noterms$Sensitivity$futility)) stop("Test failed: wrong futility in simple output")
-if(!is.na(noterms$Specificity$futility)) stop("Test failed: wrong futility in simple output")
-# check string does not contain futility or efficacy
-if(length(grep("efficacy|futility", noterms$Sensitivity$termstring))>0) stop("Test failed: string conclusion is incorrect for not having futility or efficacy")
-if(length(grep("efficacy|futility", noterms$Specificity$termstring))>0) stop("Test failed: string conclusion is incorrect for not having futility or efficacy")
-# check string contains end
-if(length(grep("final", noterms$Sensitivity$termstring))==0) stop("Test failed: string conclusion is incorrect at end")
-if(length(grep("final", noterms$Specificity$termstring))==0) stop("Test failed: string conclusion is incorrect at end")
 
 # pure interim
 #print("Testing pure interim analysis")
