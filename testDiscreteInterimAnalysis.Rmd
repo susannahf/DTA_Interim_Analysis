@@ -63,7 +63,7 @@ Test points at 20, 50 and 100.  Chosen for a useful variation of continuous Se a
 
 ```{r contsesp}
 x <- 1:nrow(contshort1)
-testpoints <- c(20, 50, 100)
+testpoints <- c(25, 75, 150)
 
 # plot continuous Se and Sp for contshort1
 plot(x,contshort1$Se,'l',col="red",ylim=c(0,1), main="Continuous Se and Sp, data set 1")
@@ -148,11 +148,11 @@ for(i in 1:5) {
 
 For Data Set1:
 
-`r kable(op1ptests)`
+`r kable(op1ptests, digits=2)`
 
 For Data set 2:
 
-`r kable(op2ptests)`
+`r kable(op2ptests, digits=2)`
 
 
 ## Different values of k
@@ -256,15 +256,70 @@ The following graphs illustrate where the method terminates.
 
 ```{r whereterminate}
 # illustrate where the method terminates
+library(ggplot2)
 
-plotSeSpFlemingThresholds(contshort1, 0.6, 0.9)
-plotSeSpFlemingThresholds(contshort2, 0.6, 0.9)
+testpoints <- c(25, 75, 150)
+prevalence = 0.35
+N = 200
+pSe <- 0.6 # stopping for efficacy
+pSp <- 0.9 # stopping for futility
+stopcs1 <- DTAdiscreteInterimAnalysis(contshort1[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
+stopcs2 <- DTAdiscreteInterimAnalysis(contshort2[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
+
+plotSeSpFlemingThresholds(contshort1, 0.6, 0.95)
+plotSeSpFlemingThresholds(contshort2, 0.6, 0.95)
+
+# try different ways of presenting it
+# plot se vs sp
+# this looks absolutely terrible
+# plot se vs sp only at the interim points
+cs1int <- data.frame(n=factor(testpoints),
+                     Se=contshort1$Se[testpoints],
+                     Sp=contshort1$Sp[testpoints],
+                     Seag=1-(stopcs1$Sensitivity$details$Crit_ag/stopcs1$Sensitivity$details$Cumulative_N),
+                     Serg=1-(stopcs1$Sensitivity$details$Crit_rg/stopcs1$Sensitivity$details$Cumulative_N),
+                     Spag=1-(stopcs1$Specificity$details$Crit_ag/stopcs1$Specificity$details$Cumulative_N),
+                     Sprg=1-(stopcs1$Specificity$details$Crit_rg/stopcs1$Specificity$details$Cumulative_N), 
+                     Sedecision=stopcs1$Sensitivity$details$Decision, 
+                     Spdecision=stopcs1$Specificity$details$Decision)
+p1 <- ggplot(data=cs1int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+  geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  labs(x="Sensitivity", y="Specificity", title="Dataset 1") 
+print(p1)
+
+cs2int <- data.frame(n=factor(testpoints),
+                     Se=contshort2$Se[testpoints],
+                     Sp=contshort2$Sp[testpoints],
+                     Seag=1-(stopcs2$Sensitivity$details$Crit_ag/stopcs2$Sensitivity$details$Cumulative_N),
+                     Serg=1-(stopcs2$Sensitivity$details$Crit_rg/stopcs2$Sensitivity$details$Cumulative_N),
+                     Spag=1-(stopcs2$Specificity$details$Crit_ag/stopcs2$Specificity$details$Cumulative_N),
+                     Sprg=1-(stopcs2$Specificity$details$Crit_rg/stopcs2$Specificity$details$Cumulative_N), 
+                     Sedecision=stopcs2$Sensitivity$details$Decision, 
+                     Spdecision=stopcs2$Specificity$details$Decision)
+p2 <- ggplot(data=cs2int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+  geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  labs(x="Sensitivity", y="Specificity", title="Dataset 2") 
+print(p2)
+
+
+
 
 ```
 
-Manually confirmed that crossing points are where termination first occurs.
+Output of analysis:
 
-Note that, since the termination lines depend on p0, rather than on the data, they are identical for both datasets for a given p0 (i.e. sensitivity or specificity).  The "stepping" behaviour seen early in the studies is probably an artefact of the requirement for stopping values to be whole numbers (of events), and hence rounding effects when this is converted to a proportion for graphical illustration.
+Dataset1
+`r kable(cs1int, digits=2)`
+
+Dataset2
+`r kable(cs2int, digits=2)`
+
+
+Manually confirmed that crossing points are where termination first occurs.
 
 The graphs converge at a value below p0, but the H0 limit appears to cross the nominal p0 line at approximately n/2.
 
@@ -336,7 +391,7 @@ csboth$Sesp[csboth$Sesp=="Se"] <- "Sensitivity"
 csboth$Sesp[csboth$Sesp=="Sp"] <- "Specificity"
 
 # vertical lines showing analysis points at 20, 50, 100
-analysispoints <- c(20,50,100)
+analysispoints <- c(25, 75, 150)
 
 csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) + 
   geom_line() +
