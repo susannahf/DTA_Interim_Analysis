@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r sourcing}
 library(knitr)
+library(ggplot2)
 source("DTAinterimAnalysis.R")
 ```
 
@@ -51,7 +52,7 @@ Acceptable p0 is Se=0.8 and Sp=0.95
 
 Nposplanned = 150
 prevplanned = 0.3
-p0 <- data.frame(type=c("desirable", "acceptable"),
+p0 <- data.frame(type=c("Desirable", "Acceptable"),
                  Se = c(0.97, 0.8), 
                  Sp = c(0.99, 0.95))
 
@@ -90,4 +91,30 @@ dtaresults[, 4:9] <- dtaresults[, 4:9] *100
 
 Results of analysis:
 
-`r kable(dtaresults, digits=0)`
+`r kable(dtaresults, digits=1)`
+
+```{r graphs}
+
+# add factor variable 
+dtaresults$Positives <- factor(dtaresults$Npos)
+
+raptorfig <- ggplot(data=dtaresults, aes(x=Sp, y=Se, label=Positives, color=Positives, fill=Positives, linetype=Positives)) +
+  geom_rect(aes(xmin=Spfut, xmax=Speff, ymin=Sefut, ymax=Seeff), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(80,100), ylim=c(50,100), expand=FALSE) +
+  labs(x="Sensitivity (%)", y="Specificity (%)") +
+  facet_grid(device ~ p0type) 
+print(raptorfig)
+
+
+
+
+```
+
+
+```{r savegraphs, eval=FALSE}
+
+ggsave("raptor.png",width=8,height=8)
+
+
+```
