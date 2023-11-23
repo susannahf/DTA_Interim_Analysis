@@ -412,15 +412,18 @@ cs1int$dataset <- "Dataset 1"
 cs2int$dataset <- "Dataset 2"
 bothint <- merge(cs1int,cs2int, all=T)
 
+# make it 0-100 not 0-1
+bothint[, 2:7] <- bothint[, 2:7] *100
+
 threshfig <- ggplot(data=bothint, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
   geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
   geom_text() +
-  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
-  labs(x="Sensitivity", y="Specificity") +
-  facet_grid(. ~ dataset)
+  coord_cartesian(xlim=c(0,100), ylim=c(0,100), expand=FALSE) +
+  labs(x="Sensitivity (%)", y="Specificity (%)") +
+  facet_grid(. ~ dataset) 
 print(threshfig)
 
-ggsave("thresholds.png",width=12,height=8)
+ggsave("thresholds.png",width=12,height=5)
 
 
 
