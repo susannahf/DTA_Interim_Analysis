@@ -3,6 +3,8 @@ title: "RAPTOR analysis"
 author: "Susannah Fleming"
 date: "2023-11-23"
 output: word_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -29,6 +31,13 @@ raptor <- read.csv("Z:\\Stats_Group_Projects\\Interim_analysis_DTA\\RAPTORdata.c
 # remove rows where there are more than 150 positives
 raptor <- raptor[raptor$n.positives<=150, ]
 
+# recode column names for compatibility
+raptorcols <- colnames(raptor)
+raptorcols[raptorcols=="n.positives"] <- "RefT"
+raptorcols[raptorcols=="n.total"] <- "N"
+colnames(raptor) <- raptorcols
+
+
 ```
 
 Planned sample size is npos=150
@@ -38,7 +47,7 @@ Planned prevalence is 0.3 (30%)
 Desirable p0 is Se=0.97 and Sp=0.99
 Acceptable p0 is Se=0.8 and Sp=0.95
 
-```{r rundta}
+```{r run_dta}
 
 Nposplanned = 150
 prevplanned = 0.3
@@ -47,6 +56,38 @@ p0 <- data.frame(type=c("desirable", "acceptable"),
                  Sp = c(0.99, 0.95))
 
 # run each analysis separately to properly show interim performance
+dtaresults <- data.frame()
+
 # run each device separately
+for(p in 1:2){
+  thisp0 <- p0[p, ]
+  for(t in 1:nrow(raptor)){
+    thisdata <- raptor[t, ]
+    thistest <- DTAcumulativeInterimAnalysis(thisdata, pSe=thisp0$Se, pSp=thisp0$Sp, 
+                                          positiveN=Nposplanned, prevalence = prevplanned,
+                                          simpleOutput=F)
+    # collect useful output
+    opdta <- data.frame(device=thisdata$Device,
+                        Npos = thisdata$RefT,
+                        p0type = thisp0$type,
+                        Se = thisdata$Sens,
+                        Sp = thisdata$Spec, 
+                        Sefut=1-(thistest$Sensitivity$details$Crit_rg/thistest$Sensitivity$details$Cumulative_N),
+                        Seeff=1-(thistest$Sensitivity$details$Crit_ag/thistest$Sensitivity$details$Cumulative_N),
+                        Spfut=1-(thistest$Specificity$details$Crit_rg/thistest$Specificity$details$Cumulative_N), 
+                        Speff=1-(thistest$Specificity$details$Crit_ag/thistest$Specificity$details$Cumulative_N),
+                        Sedecision=thistest$Sensitivity$details$Decision, 
+                        Spdecision=thistest$Specificity$details$Decision)
+    dtaresults <- rbind(dtaresults, opdta)
+  }
+}
+
+# make it 0-100 not 0-1
+dtaresults[, 4:9] <- dtaresults[, 4:9] *100
+
 
 ```
+
+Results of analysis:
+
+`r kable(dtaresults, digits=0)`
