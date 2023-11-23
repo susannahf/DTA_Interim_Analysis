@@ -423,7 +423,7 @@ threshfig <- ggplot(data=bothint, aes(x=Sp, y=Se, label=n, color=n, fill=n, line
   facet_grid(. ~ dataset) 
 print(threshfig)
 
-ggsave("thresholds.png",width=12,height=5)
+ggsave("thresholds.png",width=15,height=8)
 
 
 
