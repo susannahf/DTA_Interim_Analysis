@@ -250,7 +250,7 @@ at k=5:
 `r kable(ktestdata2[[which(kvals==5)]])`
 
 
-The following graphs illustrate where the method terminates in a realistic DTA.
+The following graphs illustrate where the method terminates in a realistic DTA, using interim points defined by total number of participants.
 
 ```{r whereterminate}
 # illustrate where the method terminates
@@ -272,6 +272,7 @@ plotSeSpFlemingThresholds(contshort2, 0.6, 0.95)
 # this looks absolutely terrible
 # plot se vs sp only at the interim points
 cs1int <- data.frame(n=factor(testpoints),
+                     npos=stopcs1$Sensitivity$details$Cumulative_N,
                      Se=contshort1$Se[testpoints],
                      Sp=contshort1$Sp[testpoints],
                      Seag=1-(stopcs1$Sensitivity$details$Crit_ag/stopcs1$Sensitivity$details$Cumulative_N),
@@ -288,6 +289,7 @@ p1 <- ggplot(data=cs1int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n))
 print(p1)
 
 cs2int <- data.frame(n=factor(testpoints),
+                     npos=stopcs2$Sensitivity$details$Cumulative_N,
                      Se=contshort2$Se[testpoints],
                      Sp=contshort2$Sp[testpoints],
                      Seag=1-(stopcs2$Sensitivity$details$Crit_ag/stopcs2$Sensitivity$details$Cumulative_N),
@@ -315,6 +317,78 @@ Dataset1
 
 Dataset2
 `r kable(cs2int, digits=2)`
+
+
+The following graphs illustrate where the method terminates in a realistic DTA, using interim points defined by number of positive participants.
+
+```{r whereterminatenpos}
+# illustrate where the method terminates when stopping points are defined by npos
+
+# what points to use for npos
+# npos at 25, 75, 150 is:
+# 8, 29, 58 for dataset 1, and 16, 44, 72 for contshort2
+# choose npos of 20, 40, 60
+
+
+# prevalence = 0.35
+# N = 200
+# pSe <- 0.75 # stopping for futility
+# pSp <- 0.9 # stopping for futility
+# stopcs1 <- DTAdiscreteInterimAnalysis(contshort1[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
+# stopcs2 <- DTAdiscreteInterimAnalysis(contshort2[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
+# 
+# plotSeSpFlemingThresholds(contshort1, 0.6, 0.95)
+# plotSeSpFlemingThresholds(contshort2, 0.6, 0.95)
+# 
+# # try different ways of presenting it
+# # plot se vs sp
+# # this looks absolutely terrible
+# # plot se vs sp only at the interim points
+# cs1int <- data.frame(n=factor(testpoints),
+#                      Se=contshort1$Se[testpoints],
+#                      Sp=contshort1$Sp[testpoints],
+#                      Seag=1-(stopcs1$Sensitivity$details$Crit_ag/stopcs1$Sensitivity$details$Cumulative_N),
+#                      Serg=1-(stopcs1$Sensitivity$details$Crit_rg/stopcs1$Sensitivity$details$Cumulative_N),
+#                      Spag=1-(stopcs1$Specificity$details$Crit_ag/stopcs1$Specificity$details$Cumulative_N),
+#                      Sprg=1-(stopcs1$Specificity$details$Crit_rg/stopcs1$Specificity$details$Cumulative_N), 
+#                      Sedecision=stopcs1$Sensitivity$details$Decision, 
+#                      Spdecision=stopcs1$Specificity$details$Decision)
+# p1 <- ggplot(data=cs1int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+#   geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+#   geom_text() +
+#   coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+#   labs(x="Specificity", y="Sensitivity", title="Dataset 1") 
+# print(p1)
+# 
+# cs2int <- data.frame(n=factor(testpoints),
+#                      Se=contshort2$Se[testpoints],
+#                      Sp=contshort2$Sp[testpoints],
+#                      Seag=1-(stopcs2$Sensitivity$details$Crit_ag/stopcs2$Sensitivity$details$Cumulative_N),
+#                      Serg=1-(stopcs2$Sensitivity$details$Crit_rg/stopcs2$Sensitivity$details$Cumulative_N),
+#                      Spag=1-(stopcs2$Specificity$details$Crit_ag/stopcs2$Specificity$details$Cumulative_N),
+#                      Sprg=1-(stopcs2$Specificity$details$Crit_rg/stopcs2$Specificity$details$Cumulative_N), 
+#                      Sedecision=stopcs2$Sensitivity$details$Decision, 
+#                      Spdecision=stopcs2$Specificity$details$Decision)
+# p2 <- ggplot(data=cs2int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+#   geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+#   geom_text() +
+#   coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+#   labs(x="Specificity", y="Sensitivity", title="Dataset 2") 
+# print(p2)
+
+
+
+
+```
+
+Output of analysis:
+
+Dataset1
+`r kable(cs1int, digits=2)`
+
+Dataset2
+`r kable(cs2int, digits=2)`
+
 
 
 Manually confirmed that crossing points are where termination first occurs.
