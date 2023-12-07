@@ -99,11 +99,12 @@ Results of analysis:
 dtaresults$Positives <- factor(dtaresults$Npos)
 
 raptorfig <- ggplot(data=dtaresults, aes(x=Sp, y=Se, label=Positives, color=Positives, fill=Positives, linetype=Positives)) +
-  geom_rect(aes(xmin=Spfut, xmax=Speff, ymin=Sefut, ymax=Seeff), alpha=0.1) +
+  geom_rect(aes(xmin=Spfut, xmax=100, ymin=Sefut, ymax=100), alpha=0.1) +
   geom_text() +
   coord_cartesian(xlim=c(80,100), ylim=c(50,100), expand=FALSE) +
   labs(x="Specificity (%)", y="Sensitivity (%)") +
-  facet_grid(device ~ p0type) 
+  facet_grid(device ~ p0type) +
+  theme_bw()
 print(raptorfig)
 
 
