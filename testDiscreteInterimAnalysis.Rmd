@@ -232,8 +232,6 @@ for(i in 1:length(kvals)) {
 
 In the tables below, "stopSe" is the sensitivity at which the termination threshold is met, and "stopatSe" is the corresponding data point (noting that the samples are 200 points long, so termination at point 200 is equivalent to no early termination.)  Specificity is handled similarly.
 
-The test with k=200 is equivalent to continuous interim analysis, as there is a test point at every data point.
-
 For Data Set1:
 
 `r kable(op1ktests,digits=3)`
@@ -252,7 +250,7 @@ at k=5:
 `r kable(ktestdata2[[which(kvals==5)]])`
 
 
-The following graphs illustrate where the method terminates.
+The following graphs illustrate where the method terminates in a realistic DTA.
 
 ```{r whereterminate}
 # illustrate where the method terminates
@@ -261,7 +259,7 @@ library(ggplot2)
 testpoints <- c(25, 75, 150)
 prevalence = 0.35
 N = 200
-pSe <- 0.6 # stopping for efficacy
+pSe <- 0.75 # stopping for futility
 pSp <- 0.9 # stopping for futility
 stopcs1 <- DTAdiscreteInterimAnalysis(contshort1[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
 stopcs2 <- DTAdiscreteInterimAnalysis(contshort2[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
@@ -354,13 +352,6 @@ for(a in alphas) {
 It appears that the two limits converge closer to p0 as both alpha and n increase, and that the H0 limit at n/2 is approximately p0.  It's not clear why this is the case.
 
 
-Next steps:
-
-* try some other methods (Stafford/todd and/or lan/demetz), particularly to see if they perform similarly in continuous configuration
-* a plot in ROC space of how sens and spec change over time?
-i.e. a standard ROC plot of sens against spec, with a series of points or lines showing a two-dimensional 'random walk' of the sensitivity and specificity estimates as they evolve.
-The 'rejection region' would then look like gradually shrinking rectangle (at least assuming sens and spec are being treated independently - otherwise it might be an ellipse) - this might be difficult to plot on a static graph, as it also changes over time.
-The whole graph might end up looking too messy, but worth a try? I think it could help to emphasise one of the discussion points we want to make, that in diagnostic studies the decision would be based on the sens and spec together, rather than just one of them.
 
 
 
@@ -403,7 +394,7 @@ csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) +
   facet_grid(dataset ~ .)
 print(csplot)
 
-ggsave("datasets.png",width=12,height=8)
+#ggsave("datasets.png",width=12,height=8)
 
 
 ## graphs of thresholds
@@ -415,8 +406,10 @@ bothint <- merge(cs1int,cs2int, all=T)
 # make it 0-100 not 0-1
 bothint[, 2:7] <- bothint[, 2:7] *100
 
+# no stopping for efficacy, so use 100 as max for all rects
+
 threshfig <- ggplot(data=bothint, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
-  geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+  geom_rect(aes(xmin=Sprg, xmax=100, ymin=Serg, ymax=100), alpha=0.1) +
   geom_text() +
   coord_cartesian(xlim=c(0,100), ylim=c(0,100), expand=FALSE) +
   labs(x="Specificity (%)", y="Sensitivity (%)") +
