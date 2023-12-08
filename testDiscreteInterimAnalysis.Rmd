@@ -357,10 +357,10 @@ nposp1 <- ggplot(data=cs1npos, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetyp
   labs(x="Specificity", y="Sensitivity", title="Dataset 1")
 print(nposp1)
 
-cs2npos <- data.frame(n=factor(testpointscs2),
+cs2npos <- data.frame(n=factor(testpointscs2),                     
+                      npos=nposstopcs2$Sensitivity$details$Cumulative_N,
                      Se=contshort2$Se[testpointscs2],
                      Sp=contshort2$Sp[testpointscs2],                     
-                     npos=nposstopcs2$Sensitivity$details$Cumulative_N,
                      Seag=1-(nposstopcs2$Sensitivity$details$Crit_ag/nposstopcs2$Sensitivity$details$Cumulative_N),
                      Serg=1-(nposstopcs2$Sensitivity$details$Crit_rg/nposstopcs2$Sensitivity$details$Cumulative_N),
                      Spag=1-(nposstopcs2$Specificity$details$Crit_ag/nposstopcs2$Specificity$details$Cumulative_N),
