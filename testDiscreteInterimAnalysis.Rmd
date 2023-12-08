@@ -454,10 +454,14 @@ csboth$Sesp[csboth$Sesp=="Sp"] <- "Specificity"
 
 # vertical lines showing analysis points at 20, 50, 100
 analysispoints <- c(25, 75, 150)
+# and at npos for each 
+npospoints <- data.frame(dataset=c(rep("Dataset 1", 3), rep("Dataset 2",3)),
+                         analysispoints=c(match(npos, contshort1$Npos), match(npos, contshort2$Npos)))
 
 csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) + 
   geom_line() +
   geom_vline(xintercept = analysispoints, linetype="dashed") +
+  geom_vline(data=npospoints, aes(xintercept=analysispoints), linetype="dotted") +
   theme_bw() +
   scale_colour_grey(name="Measure") +
   labs(x="Data point", y="Proportion") +
@@ -466,7 +470,7 @@ csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) +
   facet_grid(dataset ~ .)
 print(csplot)
 
-#ggsave("datasets.png",width=12,height=8)
+ggsave("datasets.png",width=12,height=8)
 
 
 ## graphs of thresholds
