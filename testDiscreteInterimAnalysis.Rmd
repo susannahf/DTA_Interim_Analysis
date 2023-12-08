@@ -250,7 +250,7 @@ at k=5:
 `r kable(ktestdata2[[which(kvals==5)]])`
 
 
-The following graphs illustrate where the method terminates in a realistic DTA, using interim points defined by total number of participants.
+The following graphs illustrate where the method terminates in a realistic DTA, using interim points defined by total number of participants.  Stopping for Se = 75%, Sp = 90%
 
 ```{r whereterminate}
 # illustrate where the method terminates
@@ -319,7 +319,7 @@ Dataset2
 `r kable(cs2int, digits=2)`
 
 
-The following graphs illustrate where the method terminates in a realistic DTA, using interim points defined by number of positive participants.
+The following graphs illustrate where the method terminates in a realistic DTA, using interim points defined by number of positive participants at 15, 25, 50.
 
 ```{r whereterminatenpos}
 # illustrate where the method terminates when stopping points are defined by npos
@@ -327,54 +327,52 @@ The following graphs illustrate where the method terminates in a realistic DTA, 
 # what points to use for npos
 # npos at 25, 75, 150 is:
 # 8, 29, 58 for dataset 1, and 16, 44, 72 for contshort2
-# choose npos of 20, 40, 60
+# choose npos of 15, 25, 50
 
+npos <- c(15, 25, 50)
+# add npos to data
+contshort1$Npos <- cumsum(contshort1$reference)
+contshort2$Npos <- cumsum(contshort2$reference)
+testpointscs1 <- match(npos, contshort1$Npos)
+testpointscs2 <- match(npos, contshort2$Npos)
 
-# prevalence = 0.35
-# N = 200
-# pSe <- 0.75 # stopping for futility
-# pSp <- 0.9 # stopping for futility
-# stopcs1 <- DTAdiscreteInterimAnalysis(contshort1[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
-# stopcs2 <- DTAdiscreteInterimAnalysis(contshort2[1:150,],testpoints, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
-# 
-# plotSeSpFlemingThresholds(contshort1, 0.6, 0.95)
-# plotSeSpFlemingThresholds(contshort2, 0.6, 0.95)
-# 
-# # try different ways of presenting it
-# # plot se vs sp
-# # this looks absolutely terrible
-# # plot se vs sp only at the interim points
-# cs1int <- data.frame(n=factor(testpoints),
-#                      Se=contshort1$Se[testpoints],
-#                      Sp=contshort1$Sp[testpoints],
-#                      Seag=1-(stopcs1$Sensitivity$details$Crit_ag/stopcs1$Sensitivity$details$Cumulative_N),
-#                      Serg=1-(stopcs1$Sensitivity$details$Crit_rg/stopcs1$Sensitivity$details$Cumulative_N),
-#                      Spag=1-(stopcs1$Specificity$details$Crit_ag/stopcs1$Specificity$details$Cumulative_N),
-#                      Sprg=1-(stopcs1$Specificity$details$Crit_rg/stopcs1$Specificity$details$Cumulative_N), 
-#                      Sedecision=stopcs1$Sensitivity$details$Decision, 
-#                      Spdecision=stopcs1$Specificity$details$Decision)
-# p1 <- ggplot(data=cs1int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
-#   geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
-#   geom_text() +
-#   coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
-#   labs(x="Specificity", y="Sensitivity", title="Dataset 1") 
-# print(p1)
-# 
-# cs2int <- data.frame(n=factor(testpoints),
-#                      Se=contshort2$Se[testpoints],
-#                      Sp=contshort2$Sp[testpoints],
-#                      Seag=1-(stopcs2$Sensitivity$details$Crit_ag/stopcs2$Sensitivity$details$Cumulative_N),
-#                      Serg=1-(stopcs2$Sensitivity$details$Crit_rg/stopcs2$Sensitivity$details$Cumulative_N),
-#                      Spag=1-(stopcs2$Specificity$details$Crit_ag/stopcs2$Specificity$details$Cumulative_N),
-#                      Sprg=1-(stopcs2$Specificity$details$Crit_rg/stopcs2$Specificity$details$Cumulative_N), 
-#                      Sedecision=stopcs2$Sensitivity$details$Decision, 
-#                      Spdecision=stopcs2$Specificity$details$Decision)
-# p2 <- ggplot(data=cs2int, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
-#   geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
-#   geom_text() +
-#   coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
-#   labs(x="Specificity", y="Sensitivity", title="Dataset 2") 
-# print(p2)
+nposstopcs1 <- DTAdiscreteInterimAnalysis(contshort1[1:150,],testpointscs1, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
+nposstopcs2 <- DTAdiscreteInterimAnalysis(contshort2[1:150,],testpointscs2, pSe=pSe, pSp=pSp, prevalence = prevalence, N=N, simpleOutput = F)
+
+# plot se vs sp only at the interim points
+cs1npos <- data.frame(n=factor(testpointscs1),
+                     npos=nposstopcs1$Sensitivity$details$Cumulative_N,
+                     Se=contshort1$Se[testpointscs1],
+                     Sp=contshort1$Sp[testpointscs1],
+                     Seag=1-(nposstopcs1$Sensitivity$details$Crit_ag/nposstopcs1$Sensitivity$details$Cumulative_N),
+                     Serg=1-(nposstopcs1$Sensitivity$details$Crit_rg/nposstopcs1$Sensitivity$details$Cumulative_N),
+                     Spag=1-(nposstopcs1$Specificity$details$Crit_ag/nposstopcs1$Specificity$details$Cumulative_N),
+                     Sprg=1-(nposstopcs1$Specificity$details$Crit_rg/nposstopcs1$Specificity$details$Cumulative_N),
+                     Sedecision=nposstopcs1$Sensitivity$details$Decision,
+                     Spdecision=nposstopcs1$Specificity$details$Decision)
+nposp1 <- ggplot(data=cs1npos, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+  geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  labs(x="Specificity", y="Sensitivity", title="Dataset 1")
+print(nposp1)
+
+cs2npos <- data.frame(n=factor(testpointscs2),
+                     Se=contshort2$Se[testpointscs2],
+                     Sp=contshort2$Sp[testpointscs2],                     
+                     npos=nposstopcs2$Sensitivity$details$Cumulative_N,
+                     Seag=1-(nposstopcs2$Sensitivity$details$Crit_ag/nposstopcs2$Sensitivity$details$Cumulative_N),
+                     Serg=1-(nposstopcs2$Sensitivity$details$Crit_rg/nposstopcs2$Sensitivity$details$Cumulative_N),
+                     Spag=1-(nposstopcs2$Specificity$details$Crit_ag/nposstopcs2$Specificity$details$Cumulative_N),
+                     Sprg=1-(nposstopcs2$Specificity$details$Crit_rg/nposstopcs2$Specificity$details$Cumulative_N),
+                     Sedecision=nposstopcs2$Sensitivity$details$Decision,
+                     Spdecision=nposstopcs2$Specificity$details$Decision)
+nposp2 <- ggplot(data=cs2npos, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
+  geom_rect(aes(xmin=Sprg, xmax=Spag, ymin=Serg, ymax=Seag), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(0,1), ylim=c(0,1)) +
+  labs(x="Specificity", y="Sensitivity", title="Dataset 2")
+print(nposp2)
 
 
 
@@ -384,10 +382,10 @@ The following graphs illustrate where the method terminates in a realistic DTA, 
 Output of analysis:
 
 Dataset1
-`r kable(cs1int, digits=2)`
+`r kable(cs1npos, digits=2)`
 
 Dataset2
-`r kable(cs2int, digits=2)`
+`r kable(cs2npos, digits=2)`
 
 
 
@@ -478,7 +476,7 @@ cs2int$dataset <- "Dataset 2"
 bothint <- merge(cs1int,cs2int, all=T)
 
 # make it 0-100 not 0-1
-bothint[, 2:7] <- bothint[, 2:7] *100
+bothint[, 3:8] <- bothint[, 3:8] *100
 
 # no stopping for efficacy, so use 100 as max for all rects
 
@@ -493,6 +491,27 @@ print(threshfig)
 
 ggsave("thresholds.png",width=8,height=4)
 
+## graphs of thresholds for npos
+# data - combine cs1npos and cs2npos
+cs1npos$dataset <- "Dataset 1"
+cs2npos$dataset <- "Dataset 2"
+bothnpos <- merge(cs1npos,cs2npos, all=T)
+bothnpos$npos <- factor(bothnpos$npos)
+
+# make it 0-100 not 0-1
+bothnpos[, 3:8] <- bothnpos[, 3:8] *100
+
+# no stopping for efficacy, so use 100 as max for all rects
+nposfig <- ggplot(data=bothnpos, aes(x=Sp, y=Se, label=npos, color=npos, fill=npos, linetype=npos)) +
+  geom_rect(aes(xmin=Sprg, xmax=100, ymin=Serg, ymax=100), alpha=0.1) +
+  geom_text() +
+  coord_cartesian(xlim=c(0,100), ylim=c(0,100), expand=FALSE) +
+  labs(x="Specificity (%)", y="Sensitivity (%)") +
+  facet_grid(. ~ dataset) +
+  theme_bw()
+print(nposfig)
+
+ggsave("nposthresholds.png",width=8,height=4)
 
 
 
