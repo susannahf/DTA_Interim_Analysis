@@ -458,15 +458,17 @@ analysispoints <- c(25, 75, 150)
 npospoints <- data.frame(dataset=c(rep("Dataset 1", 3), rep("Dataset 2",3)),
                          analysispoints=c(match(npos, contshort1$Npos), match(npos, contshort2$Npos)))
 
+figcols <- RColorBrewer::brewer.pal(4, "Set2")
 csplot <- ggplot(data=csboth, aes(x=x, y=Sespvalue, colour=Sesp, label=Sesp)) + 
   geom_line() +
-  geom_vline(xintercept = analysispoints, linetype="dashed") +
-  geom_vline(data=npospoints, aes(xintercept=analysispoints), linetype="dotted") +
+  geom_vline(xintercept = analysispoints, linetype="dashed", col="black") +
+  geom_vline(data=npospoints, aes(xintercept=analysispoints), linetype="solid", col=figcols[3]) +
   theme_bw() +
-  scale_colour_grey(name="Measure") +
+  scale_colour_brewer(palette = "Set2") +
   labs(x="Data point", y="Proportion") +
   theme(legend.position="right",
-        text=element_text(size=16)) +
+        text=element_text(size=16),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
   facet_grid(dataset ~ .)
 print(csplot)
 
