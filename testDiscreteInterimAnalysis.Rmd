@@ -488,7 +488,8 @@ bothint[, 3:8] <- bothint[, 3:8] *100
 
 threshfig <- ggplot(data=bothint, aes(x=Sp, y=Se, label=n, color=n, fill=n, linetype=n)) +
   geom_rect(aes(xmin=Sprg, xmax=100, ymin=Serg, ymax=100), alpha=0.1) +
-  geom_text() +
+  geom_text(nudge_y = 2, nudge_x = -4) +
+  geom_point() +
   coord_cartesian(xlim=c(0,100), ylim=c(0,100), expand=FALSE) +
   labs(x="Specificity (%)", y="Sensitivity (%)") +
   facet_grid(. ~ dataset) +
@@ -511,7 +512,8 @@ bothnpos[, 3:8] <- bothnpos[, 3:8] *100
 # no stopping for efficacy, so use 100 as max for all rects
 nposfig <- ggplot(data=bothnpos, aes(x=Sp, y=Se, label=npos, color=npos, fill=npos, linetype=npos)) +
   geom_rect(aes(xmin=Sprg, xmax=100, ymin=Serg, ymax=100), alpha=0.1) +
-  geom_text() +
+  geom_text(nudge_y = 0, nudge_x = 4) +
+  geom_point() +
   coord_cartesian(xlim=c(0,100), ylim=c(0,100), expand=FALSE) +
   labs(x="Specificity (%)", y="Sensitivity (%)") +
   facet_grid(. ~ dataset) +
