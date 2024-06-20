@@ -494,7 +494,8 @@ threshfig <- ggplot(data=bothint, aes(x=Sp, y=Se, label=n, color=n, fill=n, line
   labs(x="Specificity (%)", y="Sensitivity (%)") +
   facet_grid(. ~ dataset) +
   theme_bw() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", 
+        panel.spacing = unit(0.5, "cm", data=NULL))
 print(threshfig)
 
 ggsave("thresholds.png",width=8,height=4)
@@ -518,7 +519,8 @@ nposfig <- ggplot(data=bothnpos, aes(x=Sp, y=Se, label=npos, color=npos, fill=np
   labs(x="Specificity (%)", y="Sensitivity (%)") +
   facet_grid(. ~ dataset) +
   theme_bw() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", 
+        panel.spacing = unit(0.5, "cm", data=NULL))
 print(nposfig)
 
 ggsave("nposthresholds.png",width=8,height=4)

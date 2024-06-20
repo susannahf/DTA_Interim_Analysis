@@ -108,7 +108,8 @@ raptorfig <- ggplot(data=dtaresults, aes(x=Sp, y=Se, label=Positives, color=afte
   labs(x="Specificity (%)", y="Sensitivity (%)") +
   facet_grid(device ~ p0type) +
   theme_bw() +
-  theme(legend.position = "none")
+  theme(legend.position = "none", 
+        panel.spacing = unit(0.5, "cm", data=NULL))
 print(raptorfig)
 
 
